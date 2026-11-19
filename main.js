@@ -147,6 +147,8 @@ var UI_TEXT = {
   invalidAnnotations: ["NoteNyang skipped {count} invalid annotation files.", "형식이 올바르지 않은 주석 파일 {count}개를 건너뛰었습니다."],
   openDocumentFirst: ["Open a Markdown or PDF file first.", "먼저 마크다운이나 PDF 파일을 열어 주세요."],
   sidebarUnavailable: ["NoteNyang could not open its annotation sidebar.", "NoteNyang 주석 사이드바를 열지 못했습니다."],
+  storageMigrationConflict: ["Both notenyang and .notenyang exist. NoteNyang opens .notenyang. Check the other folder for older annotations.", "notenyang과 .notenyang 폴더가 모두 있습니다. NoteNyang은 .notenyang을 엽니다. 이전 주석은 다른 폴더도 확인하세요."],
+  storageMigrationFailed: ["Could not move NoteNyang storage. Close Obsidian, check the notenyang folder, then reopen it to retry.", "NoteNyang 저장 폴더를 옮기지 못했습니다. Obsidian을 닫고 notenyang 폴더를 확인한 뒤 다시 열어 주세요."],
   quote: ["Quote", "인용"],
   captureImage: ["Capture image", "캡처 이미지"],
   comment: ["Comment", "코멘트"],
@@ -1316,7 +1318,8 @@ function parseAnnotation(source) {
 }
 
 // src/storage/annotation-store.ts
-var STORAGE_DIRECTORY = "notenyang";
+var STORAGE_DIRECTORY = ".notenyang";
+var PREVIOUS_STORAGE_DIRECTORY = "notenyang";
 var DEFAULT_ANNOTATION_DIRECTORY = STORAGE_DIRECTORY + "/annotations";
 var DEFAULT_EXPORT_DIRECTORY = STORAGE_DIRECTORY + "/exports";
 var DEFAULT_TRASH_DIRECTORY = STORAGE_DIRECTORY + "/.trash";
@@ -2188,6 +2191,7 @@ var NoteNyangPlugin = class extends import_obsidian7.Plugin {
     if (this.settings.language !== "en" && this.settings.language !== "ko") {
       this.settings.language = "auto";
     }
+    await this.migrateStorageDirectory();
     this.applyCssSettings();
     this.store = new AnnotationStore(this.app, void 0, () => this.refresh());
     await this.store.load();
@@ -2271,6 +2275,23 @@ var NoteNyangPlugin = class extends import_obsidian7.Plugin {
         this.t(diagnostics.length === 1 ? "invalidAnnotation" : "invalidAnnotations", { count: diagnostics.length })
       );
       console.warn("NoteNyang annotation diagnostics", diagnostics);
+    }
+  }
+  async migrateStorageDirectory() {
+    const { adapter } = this.app.vault;
+    const previousAnnotations = PREVIOUS_STORAGE_DIRECTORY + "/annotations";
+    if ((await adapter.stat(previousAnnotations))?.type !== "folder") return;
+    if (await adapter.exists(STORAGE_DIRECTORY)) {
+      new import_obsidian7.Notice(this.t("storageMigrationConflict"), 1e4);
+      return;
+    }
+    try {
+      await adapter.rename(PREVIOUS_STORAGE_DIRECTORY, STORAGE_DIRECTORY);
+    } catch (error) {
+      if (!await adapter.exists(PREVIOUS_STORAGE_DIRECTORY) &&
+          (await adapter.stat(DEFAULT_ANNOTATION_DIRECTORY))?.type === "folder") return;
+      new import_obsidian7.Notice(this.t("storageMigrationFailed"), 1e4);
+      throw error;
     }
   }
   updateRibbonLabels() {

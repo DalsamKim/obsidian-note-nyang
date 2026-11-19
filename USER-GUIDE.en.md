@@ -2,7 +2,7 @@
 
 [한국어 사용설명서](USER-GUIDE.ko.md)
 
-This guide covers creating annotations in Markdown and PDFs and managing them in the right sidebar in NoteNyang 0.1.1.
+This guide covers creating annotations in Markdown and PDFs and managing them in the right sidebar in NoteNyang 0.1.2.
 
 ## Install and choose a language
 
@@ -12,6 +12,8 @@ This guide covers creating annotations in Markdown and PDFs and managing them in
 4. Go to **Settings → NoteNyang → Interface language** and choose **English**, **한국어**, or **Follow Obsidian**.
 
 Click the speech-bubble icon in the left ribbon or run **NoteNyang: Open annotations** from the command palette to open the right sidebar.
+
+When you upgrade from `0.1.1`, NoteNyang moves the existing `notenyang/` folder to `.notenyang/` on first launch. If both folders exist, NoteNyang opens `.notenyang/`. Check `notenyang/` if older annotations are missing.
 
 ## Create an annotation
 
@@ -43,7 +45,7 @@ Area capture is useful for tables and figures, including those in scanned PDFs w
 
 ### What happens when you delete a capture annotation
 
-Choose **⋯ → Delete** and confirm to move the annotation to the vault’s hidden `notenyang/.trash/` folder. If the linked PNG is in `NoteNyang 캡처/`, NoteNyang moves that image too. An image shared by multiple NoteNyang annotations moves when you delete the last annotation that refers to it. Image embeds in regular Markdown notes can break after the move.
+Choose **⋯ → Delete** and confirm to move the annotation to the vault’s hidden `.notenyang/.trash/` folder. If the linked PNG is in `NoteNyang 캡처/`, NoteNyang moves that image too. An image shared by multiple NoteNyang annotations moves when you delete the last annotation that refers to it. Image embeds in regular Markdown notes can break after the move.
 
 ## Insert an annotation into another note
 
@@ -63,8 +65,8 @@ Run **NoteNyang: Export all annotations to Markdown** to create a single timesta
 
 | Data | Location inside the vault |
 | --- | --- |
-| Annotation records | `notenyang/annotations/` |
+| Annotation records | `.notenyang/annotations/` |
 | PDF capture images | `NoteNyang 캡처/` |
-| Deleted annotations and captures moved with them | `notenyang/.trash/` |
-| Markdown exports | `notenyang/exports/` |
+| Deleted annotations and captures moved with them | `.notenyang/.trash/` |
+| Markdown exports | `.notenyang/exports/` |
 | NoteNyang settings | `.obsidian/plugins/note-nyang/data.json` |

@@ -2,7 +2,7 @@
 
 [English user guide](USER-GUIDE.en.md)
 
-NoteNyang 0.1.1에서 마크다운과 PDF에 주석을 달고, 오른쪽 사이드바에서 주석을 정리하는 방법을 안내합니다.
+NoteNyang 0.1.2에서 마크다운과 PDF에 주석을 달고, 오른쪽 사이드바에서 주석을 정리하는 방법을 안내합니다.
 
 ## 설치와 언어 선택
 
@@ -12,6 +12,8 @@ NoteNyang 0.1.1에서 마크다운과 PDF에 주석을 달고, 오른쪽 사이�
 4. **설정 → NoteNyang → 인터페이스 언어**에서 **한국어**, **English**, **Obsidian 언어 따르기** 중 하나를 선택합니다.
 
 왼쪽 리본의 말풍선 아이콘을 누르거나 명령 팔레트에서 **NoteNyang: 주석 열기**를 실행하면 오른쪽에 주석 사이드바가 열립니다.
+
+`0.1.1`에서 업데이트하면 NoteNyang이 처음 실행될 때 기존 `notenyang/` 폴더를 `.notenyang/`으로 옮깁니다. 두 폴더가 모두 있으면 `.notenyang/`을 사용하므로, 이전 주석이 보이지 않을 때는 `notenyang/`도 확인하세요.
 
 ## 주석 작성
 
@@ -43,7 +45,7 @@ NoteNyang 0.1.1에서 마크다운과 PDF에 주석을 달고, 오른쪽 사이�
 
 ### 캡처 주석을 삭제하면
 
-**⋯ → 삭제**를 누르고 확인하면 주석이 볼트의 숨김 폴더 `notenyang/.trash/`로 이동합니다. 해당 주석에 연결된 PNG가 `NoteNyang 캡처/`에 있으면 그 이미지도 함께 이동합니다. 다른 NoteNyang 주석이 같은 이미지를 참조하면 마지막 주석을 삭제할 때 옮깁니다. 일반 마크다운 노트에 삽입해 둔 해당 이미지 링크는 이동 후 끊길 수 있습니다.
+**⋯ → 삭제**를 누르고 확인하면 주석이 볼트의 숨김 폴더 `.notenyang/.trash/`로 이동합니다. 해당 주석에 연결된 PNG가 `NoteNyang 캡처/`에 있으면 그 이미지도 함께 이동합니다. 다른 NoteNyang 주석이 같은 이미지를 참조하면 마지막 주석을 삭제할 때 옮깁니다. 일반 마크다운 노트에 삽입해 둔 해당 이미지 링크는 이동 후 끊길 수 있습니다.
 
 ## 주석을 다른 노트에 인용
 
@@ -63,8 +65,8 @@ NoteNyang 0.1.1에서 마크다운과 PDF에 주석을 달고, 오른쪽 사이�
 
 | 데이터 | 볼트 내 저장 위치 |
 | --- | --- |
-| 주석 원본 | `notenyang/annotations/` |
+| 주석 원본 | `.notenyang/annotations/` |
 | PDF 캡처 이미지 | `NoteNyang 캡처/` |
-| 삭제한 주석과 함께 이동한 이미지 | `notenyang/.trash/` |
-| 마크다운 내보내기 | `notenyang/exports/` |
+| 삭제한 주석과 함께 이동한 이미지 | `.notenyang/.trash/` |
+| 마크다운 내보내기 | `.notenyang/exports/` |
 | NoteNyang 설정 | `.obsidian/plugins/note-nyang/data.json` |

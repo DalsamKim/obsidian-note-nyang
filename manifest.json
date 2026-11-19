@@ -1,7 +1,7 @@
 {
   "id": "note-nyang",
   "name": "NoteNyang",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "minAppVersion": "1.7.2",
   "description": "Annotate Markdown notes and PDFs with highlights, margin cards, and a review sidebar.",
   "author": "DalsamKim",
