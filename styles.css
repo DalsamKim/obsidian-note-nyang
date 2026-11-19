@@ -1,10 +1,10 @@
 :root {
-  --siden-personal-margin-width: 200px;
-  --siden-personal-highlight-color: #ffd54f;
-  --siden-personal-highlight-opacity: 0.35;
+  --notenyang-margin-width: 200px;
+  --notenyang-highlight-color: #ffd54f;
+  --notenyang-highlight-opacity: 0.35;
 }
 
-.siden-personal-sidebar {
+.notenyang-sidebar {
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
@@ -17,7 +17,7 @@
   width: 100%;
 }
 
-.siden-personal-toolbar {
+.notenyang-toolbar {
   display: grid;
   grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
   gap: var(--size-4-2);
@@ -25,36 +25,36 @@
   min-width: 0;
 }
 
-.siden-personal-toolbar button,
-.siden-personal-toolbar select,
-.siden-personal-search {
+.notenyang-toolbar button,
+.notenyang-toolbar select,
+.notenyang-search {
   box-sizing: border-box;
   max-width: 100%;
   min-width: 0;
   width: 100%;
 }
 
-.siden-personal-toolbar .siden-personal-scope {
+.notenyang-toolbar .notenyang-scope {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: var(--size-4-1);
 }
 
-.siden-personal-scope-label {
+.notenyang-scope-label {
   min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.siden-personal-scope-icon {
+.notenyang-scope-icon {
   display: flex;
   flex-shrink: 0;
   color: var(--text-muted);
 }
 
-.siden-personal-list {
+.notenyang-list {
   display: flex;
   flex: 1;
   flex-direction: column;
@@ -66,13 +66,13 @@
   width: 100%;
 }
 
-.siden-personal-empty {
+.notenyang-empty {
   color: var(--text-muted);
   padding: var(--size-4-4);
   text-align: center;
 }
 
-.siden-personal-card {
+.notenyang-card {
   background: var(--background-primary);
   border: 1px solid var(--background-modifier-border);
   border-radius: var(--radius-m);
@@ -87,24 +87,24 @@
   width: 100%;
 }
 
-.siden-personal-card:hover,
-.siden-personal-card:focus-visible,
-.siden-personal-card.is-active {
+.notenyang-card:hover,
+.notenyang-card:focus-visible,
+.notenyang-card.is-active {
   background: var(--background-secondary-alt);
   border-color: var(--interactive-accent);
   outline: none;
 }
 
-.siden-personal-card.siden-personal-status-resolved {
+.notenyang-card.notenyang-status-resolved {
   border-inline-start-color: var(--text-muted);
   opacity: 0.78;
 }
 
-.siden-personal-card.siden-personal-status-orphaned {
+.notenyang-card.notenyang-status-orphaned {
   border-inline-start-color: var(--color-red);
 }
 
-.siden-personal-card-header {
+.notenyang-card-header {
   align-items: center;
   display: flex;
   gap: var(--size-4-2);
@@ -115,13 +115,13 @@
   overflow: hidden;
 }
 
-.siden-personal-card-location {
+.notenyang-card-location {
   color: var(--text-muted);
   flex: 1;
   font-size: var(--font-ui-smaller);
 }
 
-.siden-personal-drag-handle {
+.notenyang-drag-handle {
   color: var(--text-muted);
   cursor: grab;
   display: flex;
@@ -129,18 +129,18 @@
   align-items: center;
 }
 
-.siden-personal-drag-handle:active {
+.notenyang-drag-handle:active {
   cursor: grabbing;
 }
 
-.siden-personal-capture {
+.notenyang-capture {
   display: block;
   height: auto;
   margin: var(--size-4-3) 0;
   max-width: 100%;
 }
 
-.siden-personal-region-selection {
+.notenyang-region-selection {
   background: color-mix(in srgb, var(--interactive-accent) 15%, transparent);
   border: 2px solid var(--interactive-accent);
   box-sizing: border-box;
@@ -150,7 +150,7 @@
   z-index: 99999;
 }
 
-.siden-personal-capture-overlay {
+.notenyang-capture-overlay {
   cursor: crosshair;
   inset: 0;
   position: absolute;
@@ -158,13 +158,13 @@
   z-index: 10000;
 }
 
-.siden-personal-card-status {
+.notenyang-card-status {
   color: var(--text-muted);
   font-size: var(--font-ui-smaller);
   text-transform: capitalize;
 }
 
-.siden-personal-sidebar .siden-personal-card-quote {
+.notenyang-sidebar .notenyang-card-quote {
   border: 0;
   box-sizing: border-box;
   color: var(--text-muted);
@@ -181,46 +181,46 @@
   width: 100%;
 }
 
-.siden-personal-card-comment {
+.notenyang-card-comment {
   background: var(--background-secondary);
   border-radius: var(--radius-s);
   padding: var(--size-4-3);
 }
 
-.siden-personal-card-comment[role="button"] {
+.notenyang-card-comment[role="button"] {
   cursor: text;
 }
 
-.siden-personal-card-comment[role="button"]:focus-visible {
+.notenyang-card-comment[role="button"]:focus-visible {
   outline: 2px solid var(--interactive-accent);
   outline-offset: 2px;
 }
 
-.siden-personal-card-date {
+.notenyang-card-date {
   color: var(--text-faint);
   display: block;
   font-size: var(--font-ui-smaller);
   margin-top: var(--size-4-2);
 }
 
-.siden-personal-card-body,
-.siden-personal-card-body.markdown-rendered,
-.siden-personal-card-body.markdown-rendered > * {
+.notenyang-card-body,
+.notenyang-card-body.markdown-rendered,
+.notenyang-card-body.markdown-rendered > * {
   box-sizing: border-box;
   max-width: 100%;
   min-width: 0;
   overflow-x: hidden;
 }
 
-.siden-personal-card-body > :first-child,
-.siden-personal-margin-card .markdown-rendered > :first-child {
+.notenyang-card-body > :first-child,
+.notenyang-margin-card .markdown-rendered > :first-child {
   margin-top: 0;
 }
 
-.siden-personal-sidebar.siden-personal-force-word-breaks .siden-personal-card,
-.siden-personal-sidebar.siden-personal-force-word-breaks .siden-personal-card *:not(textarea),
-.siden-personal-sidebar.siden-personal-force-word-breaks .siden-personal-card-quote,
-.siden-personal-sidebar.siden-personal-force-word-breaks .siden-personal-card-body {
+.notenyang-sidebar.notenyang-force-word-breaks .notenyang-card,
+.notenyang-sidebar.notenyang-force-word-breaks .notenyang-card *:not(textarea),
+.notenyang-sidebar.notenyang-force-word-breaks .notenyang-card-quote,
+.notenyang-sidebar.notenyang-force-word-breaks .notenyang-card-body {
   hyphens: auto !important;
   max-inline-size: 100% !important;
   min-inline-size: 0 !important;
@@ -229,20 +229,20 @@
   word-break: break-all !important;
 }
 
-.siden-personal-sidebar.siden-personal-force-word-breaks .siden-personal-card-quote {
+.notenyang-sidebar.notenyang-force-word-breaks .notenyang-card-quote {
   white-space: pre-wrap !important;
   word-break: normal !important;
 }
 
-.siden-personal-sidebar .siden-personal-card pre,
-.siden-personal-sidebar .siden-personal-card code {
+.notenyang-sidebar .notenyang-card pre,
+.notenyang-sidebar .notenyang-card code {
   box-sizing: border-box;
   max-width: 100%;
   overflow-x: hidden !important;
   white-space: pre-wrap !important;
 }
 
-.siden-personal-sidebar .siden-personal-card table {
+.notenyang-sidebar .notenyang-card table {
   display: block;
   max-width: 100%;
   overflow-x: hidden;
@@ -250,24 +250,24 @@
   width: 100%;
 }
 
-.siden-personal-sidebar .siden-personal-card img,
-.siden-personal-sidebar .siden-personal-card video,
-.siden-personal-sidebar .siden-personal-card iframe,
-.siden-personal-sidebar .siden-personal-card svg {
+.notenyang-sidebar .notenyang-card img,
+.notenyang-sidebar .notenyang-card video,
+.notenyang-sidebar .notenyang-card iframe,
+.notenyang-sidebar .notenyang-card svg {
   height: auto;
   max-width: 100%;
 }
 
-.siden-personal-card-body > :last-child,
-.siden-personal-margin-card .markdown-rendered > :last-child {
+.notenyang-card-body > :last-child,
+.notenyang-margin-card .markdown-rendered > :last-child {
   margin-bottom: 0;
 }
 
-.siden-personal-draft-host:empty {
+.notenyang-draft-host:empty {
   display: none;
 }
 
-.siden-personal-draft {
+.notenyang-draft {
   background: var(--background-primary);
   border: 1px solid var(--interactive-accent);
   border-radius: var(--radius-m);
@@ -276,7 +276,7 @@
   padding: var(--size-4-3);
 }
 
-.siden-personal-draft-textarea {
+.notenyang-draft-textarea {
   box-sizing: border-box;
   display: block;
   margin-top: var(--size-4-2);
@@ -286,36 +286,36 @@
   width: 100%;
 }
 
-.siden-personal-draft-actions {
+.notenyang-draft-actions {
   display: flex;
   gap: var(--size-4-2);
   justify-content: flex-end;
   margin-top: var(--size-4-2);
 }
 
-.siden-personal-highlight {
+.notenyang-highlight {
   border-radius: 2px;
   cursor: pointer;
 }
 
-.siden-personal-highlight-background,
-.siden-personal-highlight-both {
+.notenyang-highlight-background,
+.notenyang-highlight-both {
   background: color-mix(
     in srgb,
-    var(--siden-personal-highlight-color) calc(var(--siden-personal-highlight-opacity) * 100%),
+    var(--notenyang-highlight-color) calc(var(--notenyang-highlight-opacity) * 100%),
     transparent
   );
 }
 
-.siden-personal-highlight-underline,
-.siden-personal-highlight-both {
-  text-decoration-color: var(--siden-personal-highlight-color);
+.notenyang-highlight-underline,
+.notenyang-highlight-both {
+  text-decoration-color: var(--notenyang-highlight-color);
   text-decoration-line: underline;
   text-decoration-thickness: 2px;
   text-underline-offset: 2px;
 }
 
-.siden-personal-margin-card {
+.notenyang-margin-card {
   background: var(--background-primary);
   border: 1px solid var(--background-modifier-border);
   border-inline-start: 3px solid var(--interactive-accent);
@@ -330,37 +330,37 @@
   box-sizing: border-box;
   height: fit-content;
   max-height: min(24rem, 70vh);
-  max-width: var(--siden-personal-available-width, var(--siden-personal-margin-width));
-  min-width: min(72px, var(--siden-personal-available-width, 72px));
+  max-width: var(--notenyang-available-width, var(--notenyang-margin-width));
+  min-width: min(72px, var(--notenyang-available-width, 72px));
   min-inline-size: 0 !important;
   overflow-x: hidden;
   overflow-y: auto;
   white-space: normal;
   width: min(
-    var(--siden-personal-margin-width),
-    var(--siden-personal-available-width, var(--siden-personal-margin-width))
+    var(--notenyang-margin-width),
+    var(--notenyang-available-width, var(--notenyang-margin-width))
   );
   z-index: var(--layer-popover);
 }
 
-.siden-personal-margin-card *,
-.siden-personal-margin-card .markdown-rendered {
+.notenyang-margin-card *,
+.notenyang-margin-card .markdown-rendered {
   box-sizing: border-box;
   max-width: 100%;
   min-width: 0;
   white-space: normal;
 }
 
-.siden-personal-margin-card pre,
-.siden-personal-margin-card code {
+.notenyang-margin-card pre,
+.notenyang-margin-card code {
   max-width: 100%;
   overflow-x: hidden;
   white-space: pre-wrap;
 }
 
-.siden-personal-margin-card.siden-personal-force-word-breaks,
-.siden-personal-margin-card.siden-personal-force-word-breaks *,
-.siden-personal-margin-card.siden-personal-force-word-breaks .markdown-rendered {
+.notenyang-margin-card.notenyang-force-word-breaks,
+.notenyang-margin-card.notenyang-force-word-breaks *,
+.notenyang-margin-card.notenyang-force-word-breaks .markdown-rendered {
   hyphens: auto !important;
   max-inline-size: 100% !important;
   min-inline-size: 0 !important;
@@ -369,8 +369,8 @@
   word-break: break-all !important;
 }
 
-.siden-personal-margin-card:hover,
-.siden-personal-margin-card:focus-visible {
+.notenyang-margin-card:hover,
+.notenyang-margin-card:focus-visible {
   border-color: var(--interactive-accent);
   outline: none;
 }
@@ -379,7 +379,7 @@
   position: relative;
 }
 
-.siden-personal-editor-margin-layer {
+.notenyang-editor-margin-layer {
   inset: 0;
   overflow: hidden;
   pointer-events: none;
@@ -387,16 +387,16 @@
   z-index: var(--layer-popover);
 }
 
-.siden-personal-editor-margin-layer .siden-personal-margin-card {
+.notenyang-editor-margin-layer .notenyang-margin-card {
   pointer-events: auto;
   position: absolute;
 }
 
-.siden-personal-reading-preview {
+.notenyang-reading-preview {
   position: relative;
 }
 
-.siden-personal-reading-margin-layer {
+.notenyang-reading-margin-layer {
   inset: 0 0 auto;
   min-height: 100%;
   overflow: hidden;
@@ -406,7 +406,7 @@
   z-index: var(--layer-popover);
 }
 
-.siden-personal-margin-card-reading {
+.notenyang-margin-card-reading {
   pointer-events: auto;
   position: absolute;
 }
@@ -416,25 +416,25 @@
   position: relative;
 }
 
-.siden-personal-pdf-highlight-layer {
+.notenyang-pdf-highlight-layer {
   inset: 0;
   pointer-events: none;
   position: absolute;
   z-index: 4;
 }
 
-.siden-personal-pdf-highlight {
-  background: var(--siden-personal-highlight-color);
+.notenyang-pdf-highlight {
+  background: var(--notenyang-highlight-color);
   border-radius: 2px;
-  opacity: var(--siden-personal-highlight-opacity);
+  opacity: var(--notenyang-highlight-opacity);
   pointer-events: auto;
   position: absolute;
 }
 
-.siden-personal-pdf-highlight-layer.is-active .siden-personal-pdf-highlight {
+.notenyang-pdf-highlight-layer.is-active .notenyang-pdf-highlight {
   box-shadow: 0 0 0 2px var(--interactive-accent);
 }
 
-.siden-personal-ribbon-hidden {
+.notenyang-ribbon-hidden {
   display: none !important;
 }

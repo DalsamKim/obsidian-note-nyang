@@ -20,7 +20,7 @@ var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: tru
 // src/main.ts
 var main_exports = {};
 __export(main_exports, {
-  default: () => SidenPlugin
+  default: () => NoteNyangPlugin
 });
 module.exports = __toCommonJS(main_exports);
 var import_obsidian7 = require("obsidian");
@@ -205,8 +205,8 @@ function buildHighlights(view, plugin, annotations) {
       from,
       to,
       import_view.Decoration.mark({
-        class: `siden-personal-highlight siden-personal-highlight-${plugin.settings.highlightStyle}`,
-        attributes: { "data-siden-personal-id": annotation.id }
+        class: `notenyang-highlight notenyang-highlight-${plugin.settings.highlightStyle}`,
+        attributes: { "data-notenyang-id": annotation.id }
       })
     );
   }
@@ -245,12 +245,12 @@ function choosePlacement(view, plugin) {
 }
 function createMarginCard(annotation, plugin, width) {
   const card = createDiv();
-  card.className = "siden-personal-margin-card siden-personal-margin-card-live";
+  card.className = "notenyang-margin-card notenyang-margin-card-live";
   card.classList.toggle(
-    "siden-personal-force-word-breaks",
+    "notenyang-force-word-breaks",
     plugin.settings.forceLongWordBreaks
   );
-  card.dataset.sidenPersonalId = annotation.id;
+  card.dataset.notenyangId = annotation.id;
   card.tabIndex = 0;
   card.setAttribute("role", "button");
   card.textContent = annotation.body;
@@ -350,7 +350,7 @@ function createMarkdownExtension(plugin) {
         this.revision = plugin.editorRevision;
         this.refreshDecorations();
         this.marginLayer = view.dom.createDiv({
-          cls: "siden-personal-editor-margin-layer"
+          cls: "notenyang-editor-margin-layer"
         });
         this.resizeObserver = new ResizeObserver(() => this.scheduleMargins());
         this.resizeObserver.observe(view.dom);
@@ -401,9 +401,9 @@ function createMarkdownExtension(plugin) {
       eventHandlers: {
         click(event) {
           const target = event.target;
-          const highlight = target.closest("[data-siden-personal-id]");
-          if (!highlight?.dataset.sidenPersonalId) return false;
-          void plugin.activateAnnotation(highlight.dataset.sidenPersonalId);
+          const highlight = target.closest("[data-notenyang-id]");
+          if (!highlight?.dataset.notenyangId) return false;
+          void plugin.activateAnnotation(highlight.dataset.notenyangId);
           return true;
         }
       }
@@ -489,12 +489,12 @@ var PdfAdapter = class {
     }
     const pageOverlays = pages.map((page) => {
       const overlay = document.createElement("div");
-      overlay.className = "siden-personal-capture-overlay";
+      overlay.className = "notenyang-capture-overlay";
       page.appendChild(overlay);
       return overlay;
     });
     const box = document.createElement("div");
-    box.className = "siden-personal-region-selection";
+    box.className = "notenyang-region-selection";
     document.body.appendChild(box);
     let start = null;
     const cleanup = () => {
@@ -729,11 +729,11 @@ var PdfAdapter = class {
     const rectangles = recovered ?? annotation.anchor.rectangles;
     const coordinateSpace = recovered ? "normalized" : annotation.anchor.coordinateSpace ?? "css-pixels";
     const layer = page.createDiv({
-      cls: `siden-personal-pdf-highlight-layer${activeId === annotation.id ? " is-active" : ""}`,
-      attr: { "data-siden-personal-pdf-id": annotation.id }
+      cls: `notenyang-pdf-highlight-layer${activeId === annotation.id ? " is-active" : ""}`,
+      attr: { "data-notenyang-pdf-id": annotation.id }
     });
     for (const rectangle of rectangles) {
-      const mark = layer.createDiv({ cls: "siden-personal-pdf-highlight" });
+      const mark = layer.createDiv({ cls: "notenyang-pdf-highlight" });
       const style = rectangleCss(rectangle, coordinateSpace);
       mark.style.left = style.left;
       mark.style.top = style.top;
@@ -753,7 +753,7 @@ var PdfAdapter = class {
       NodeFilter.SHOW_TEXT,
       {
         acceptNode(node) {
-          return node.parentElement?.closest(".siden-personal-pdf-highlight-layer") ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT;
+          return node.parentElement?.closest(".notenyang-pdf-highlight-layer") ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT;
         }
       }
     );
@@ -833,7 +833,7 @@ function textSegments(root) {
     acceptNode(node2) {
       const parent = node2.parentElement;
       if (!parent || parent.closest(
-        ".siden-personal-reading-margin-layer, code, pre, script, style, .math"
+        ".notenyang-reading-margin-layer, code, pre, script, style, .math"
       )) {
         return NodeFilter.FILTER_REJECT;
       }
@@ -877,7 +877,7 @@ function locateQuote(text, quote) {
 function highlightOccurrence(root, annotation, plugin) {
   if (annotation.anchor.kind !== "markdown") return null;
   const existing = root.querySelector(
-    `[data-siden-personal-id="${annotation.id}"]`
+    `[data-notenyang-id="${annotation.id}"]`
   );
   if (existing) return existing;
   const { text, segments } = textSegments(root);
@@ -893,8 +893,8 @@ function highlightOccurrence(root, annotation, plugin) {
     range.setStart(segment.node, from - segment.start);
     range.setEnd(segment.node, to - segment.start);
     const mark = createEl("mark");
-    mark.className = `siden-personal-highlight siden-personal-highlight-${plugin.settings.highlightStyle}`;
-    mark.dataset.sidenPersonalId = annotation.id;
+    mark.className = `notenyang-highlight notenyang-highlight-${plugin.settings.highlightStyle}`;
+    mark.dataset.notenyangId = annotation.id;
     mark.addEventListener(
       "click",
       () => void plugin.activateAnnotation(annotation.id)
@@ -906,7 +906,7 @@ function highlightOccurrence(root, annotation, plugin) {
 }
 function findAnchor(root, annotation, readText) {
   const highlighted = root.querySelector(
-    `[data-siden-personal-id="${annotation.id}"]`
+    `[data-notenyang-id="${annotation.id}"]`
   );
   if (highlighted) return highlighted;
   if (annotation.anchor.kind !== "markdown") return null;
@@ -922,8 +922,8 @@ function ensurePreviewState(preview, plugin) {
     (state2) => state2.preview === preview
   );
   if (existing) return existing;
-  preview.addClass("siden-personal-reading-preview");
-  const layer = preview.createDiv({ cls: "siden-personal-reading-margin-layer" });
+  preview.addClass("notenyang-reading-preview");
+  const layer = preview.createDiv({ cls: "notenyang-reading-margin-layer" });
   const state = {
     plugin,
     preview,
@@ -979,7 +979,7 @@ function renderPreviewMargins(state) {
   if (!plugin.settings.showMargins || plugin.areMarginsSuppressed() || preview.clientWidth < plugin.settings.narrowPaneThreshold) return;
   const placement = measurePlacement(state);
   if (!placement) return;
-  const filePath = preview.dataset.sidenPersonalSourcePath;
+  const filePath = preview.dataset.notenyangSourcePath;
   if (!filePath) return;
   layer.style.height = `${preview.scrollHeight}px`;
   const previewRect = preview.getBoundingClientRect();
@@ -999,10 +999,10 @@ function renderPreviewMargins(state) {
   let nextTop = 6;
   for (const entry of entries) {
     const card = layer.createDiv({
-      cls: `siden-personal-margin-card siden-personal-margin-card-reading${plugin.settings.forceLongWordBreaks ? " siden-personal-force-word-breaks" : ""}`,
+      cls: `notenyang-margin-card notenyang-margin-card-reading${plugin.settings.forceLongWordBreaks ? " notenyang-force-word-breaks" : ""}`,
       text: entry.annotation.body,
       attr: {
-        "data-siden-personal-id": entry.annotation.id,
+        "data-notenyang-id": entry.annotation.id,
         tabindex: "0",
         role: "button",
         "aria-label": plugin.t("openAnnotation", { body: entry.annotation.body })
@@ -1030,16 +1030,16 @@ function refreshReadingMargins(plugin) {
   }
 }
 function processReadingView(element, context, plugin) {
-  if (context.sourcePath.startsWith(".siden-personal/")) return;
+  if (context.sourcePath.startsWith(STORAGE_DIRECTORY + "/")) return;
   const annotations = plugin.store.forSource(context.sourcePath).filter(
     (annotation) => annotation.anchor.kind === "markdown" && (annotation.status !== "resolved" || plugin.settings.showResolved)
   );
   if (annotations.length === 0) {
-    const preview = element.closest(".siden-personal-reading-preview");
+    const preview = element.closest(".notenyang-reading-preview");
     if (preview) {
       const oldState = [...previewStates].find((state) => state.preview === preview);
       if (oldState) destroyPreviewState(oldState);
-      preview.classList.remove("siden-personal-reading-preview");
+      preview.classList.remove("notenyang-reading-preview");
     }
     return;
   }
@@ -1050,14 +1050,13 @@ function processReadingView(element, context, plugin) {
   }
   const preview = element.closest(".markdown-preview-view");
   if (!preview) return;
-  preview.dataset.sidenPersonalSourcePath = context.sourcePath;
+  preview.dataset.notenyangSourcePath = context.sourcePath;
   schedulePreview(ensurePreviewState(preview, plugin));
 }
 
 // src/settings.ts
 var import_obsidian3 = require("obsidian");
 var CAPTURE_FOLDER = "NoteNyang 캡처";
-var LEGACY_CAPTURE_FOLDER = "Siden Personal 캡처";
 var DEFAULT_SETTINGS = {
   language: "auto",
   showHighlights: true,
@@ -1077,7 +1076,7 @@ var DEFAULT_SETTINGS = {
   includeInsertedComment: true,
   includeInsertedSource: true
 };
-var SidenSettingTab = class extends import_obsidian3.PluginSettingTab {
+var NoteNyangSettingTab = class extends import_obsidian3.PluginSettingTab {
   constructor(app, plugin) {
     super(app, plugin);
     this.plugin = plugin;
@@ -1207,8 +1206,8 @@ function assertAnnotation(value) {
 }
 
 // src/storage/annotation-markdown.ts
-var ANCHOR_START = "<!-- siden:anchor -->";
-var ANCHOR_END = "<!-- /siden:anchor -->";
+var ANCHOR_START = "<!-- notenyang:anchor -->";
+var ANCHOR_END = "<!-- /notenyang:anchor -->";
 function scalar(value) {
   return typeof value === "number" ? String(value) : JSON.stringify(value);
 }
@@ -1252,7 +1251,7 @@ function serializeAnnotation(annotation) {
   assertAnnotation(annotation);
   const frontmatter = [
     "---",
-    `siden-personal-schema: ${annotation.schemaVersion}`,
+    `notenyang-schema: ${annotation.schemaVersion}`,
     `id: ${scalar(annotation.id)}`,
     `source: ${scalar(annotation.sourcePath)}`,
     `source-type: ${scalar(annotation.sourceType)}`,
@@ -1302,7 +1301,7 @@ function parseAnnotation(source) {
     throw new Error("Annotation body heading is missing.");
   }
   const annotation = {
-    schemaVersion: Number(metadata["siden-personal-schema"]),
+    schemaVersion: Number(metadata["notenyang-schema"]),
     id: requiredString(metadata, "id"),
     sourcePath: requiredString(metadata, "source"),
     sourceType: requiredString(metadata, "source-type"),
@@ -1317,8 +1316,10 @@ function parseAnnotation(source) {
 }
 
 // src/storage/annotation-store.ts
-var DEFAULT_ANNOTATION_DIRECTORY = ".siden-personal/annotations";
-var DEFAULT_TRASH_DIRECTORY = ".siden-personal/trash";
+var STORAGE_DIRECTORY = "notenyang";
+var DEFAULT_ANNOTATION_DIRECTORY = STORAGE_DIRECTORY + "/annotations";
+var DEFAULT_EXPORT_DIRECTORY = STORAGE_DIRECTORY + "/exports";
+var DEFAULT_TRASH_DIRECTORY = STORAGE_DIRECTORY + "/.trash";
 var CaptureTrashError = class extends Error {
   constructor(cause, path) {
     super("Could not move the NoteNyang capture to the trash.", { cause });
@@ -1425,7 +1426,7 @@ var AnnotationStore = class {
     const { anchor } = annotation;
     if (anchor.kind !== "pdf" || typeof anchor.imagePath !== "string") return null;
     const [folder, filename, extra] = anchor.imagePath.split("/");
-    if (folder !== CAPTURE_FOLDER && folder !== LEGACY_CAPTURE_FOLDER) return null;
+    if (folder !== CAPTURE_FOLDER) return null;
     if (extra !== void 0 || !filename || !/^[^\\:\x00-\x1f]+\.png$/i.test(filename)) return null;
     const path = anchor.imagePath.toLowerCase();
     const shared = this.all().some((other) =>
@@ -1581,7 +1582,7 @@ var AnnotationStore = class {
 var import_obsidian6 = require("obsidian");
 
 // src/domain/annotation-drag.ts
-var ANNOTATION_URI_ACTION = "siden-personal-annotation";
+var ANNOTATION_URI_ACTION = "notenyang-annotation";
 function formatAnnotationForDrag(annotation, settings = DEFAULT_SETTINGS, vaultName) {
   const t = (key, values) => uiText(settings, key, values);
   const parts = [`[!quote] ${t("quote")}`];
@@ -1652,13 +1653,13 @@ var ConfirmModal = class extends import_obsidian5.Modal {
 };
 
 // src/ui/sidebar-view.ts
-var SIDEN_VIEW_TYPE = "siden-personal-annotations";
+var NOTENYANG_VIEW_TYPE = "notenyang-annotations";
 function formatAnchorLocation(anchor, t) {
   if (anchor.kind === "markdown") return t("line", { number: anchor.startLine + 1 });
   if (anchor.kind === "pdf") return t("page", { number: anchor.page });
   return t("document");
 }
-var SidenSidebarView = class extends import_obsidian6.ItemView {
+var NoteNyangSidebarView = class extends import_obsidian6.ItemView {
   constructor(leaf, plugin) {
     super(leaf);
     this.plugin = plugin;
@@ -1674,7 +1675,7 @@ var SidenSidebarView = class extends import_obsidian6.ItemView {
   draftEl;
   listEl;
   getViewType() {
-    return SIDEN_VIEW_TYPE;
+    return NOTENYANG_VIEW_TYPE;
   }
   getDisplayText() {
     return "NoteNyang";
@@ -1694,9 +1695,9 @@ var SidenSidebarView = class extends import_obsidian6.ItemView {
   }
   setActiveAnnotation(id) {
     this.activeId = id;
-    this.containerEl.querySelectorAll(".siden-personal-card.is-active").forEach((element) => element.removeClass("is-active"));
+    this.containerEl.querySelectorAll(".notenyang-card.is-active").forEach((element) => element.removeClass("is-active"));
     if (id) {
-      const card = this.containerEl.querySelector(`[data-siden-personal-id="${id}"]`);
+      const card = this.containerEl.querySelector(`[data-notenyang-id="${id}"]`);
       card?.addClass("is-active");
       card?.scrollIntoView({ block: "nearest" });
     }
@@ -1715,14 +1716,14 @@ var SidenSidebarView = class extends import_obsidian6.ItemView {
     const root = this.containerEl.children[1];
     if (this.toolbarEl?.parentElement !== root) {
       root.empty();
-      root.addClass("siden-personal-sidebar");
-      this.toolbarEl = root.createDiv({ cls: "siden-personal-toolbar" });
+      root.addClass("notenyang-sidebar");
+      this.toolbarEl = root.createDiv({ cls: "notenyang-toolbar" });
       this.searchEl = this.createSearch(root);
-      this.draftEl = root.createDiv({ cls: "siden-personal-draft-host" });
-      this.listEl = root.createDiv({ cls: "siden-personal-list" });
+      this.draftEl = root.createDiv({ cls: "notenyang-draft-host" });
+      this.listEl = root.createDiv({ cls: "notenyang-list" });
     }
     root.toggleClass(
-      "siden-personal-force-word-breaks",
+      "notenyang-force-word-breaks",
       this.plugin.settings.forceLongWordBreaks
     );
     this.searchEl.placeholder = this.plugin.t("searchPlaceholder");
@@ -1741,7 +1742,7 @@ var SidenSidebarView = class extends import_obsidian6.ItemView {
     }
     if (annotations.length === 0) {
       list.createDiv({
-        cls: "siden-personal-empty",
+        cls: "notenyang-empty",
         text: this.plugin.t("noAnnotations")
       });
       return;
@@ -1752,17 +1753,17 @@ var SidenSidebarView = class extends import_obsidian6.ItemView {
     if (!this.draft) return;
     const { t } = this.plugin;
     const draft = this.draft;
-    const form = root.createDiv({ cls: "siden-personal-draft" });
+    const form = root.createDiv({ cls: "notenyang-draft" });
     const anchor = draft.mode === "create" ? draft.input.anchor : draft.annotation.anchor;
     const location = formatAnchorLocation(anchor, t);
-    const header = form.createDiv({ cls: "siden-personal-card-header" });
-    header.createSpan({ cls: "siden-personal-card-location", text: this.plugin.settings.showCardLocation ? location : "" });
+    const header = form.createDiv({ cls: "notenyang-card-header" });
+    header.createSpan({ cls: "notenyang-card-location", text: this.plugin.settings.showCardLocation ? location : "" });
     const imageUrl = draft.mode === "create" && draft.imageDataUrl ? draft.imageDataUrl : anchor.kind === "pdf" && anchor.imagePath ? this.app.vault.adapter.getResourcePath(anchor.imagePath) : null;
     if (imageUrl) {
-      form.createEl("img", { cls: "siden-personal-capture", attr: { src: imageUrl, alt: t("pdfCapture") } });
+      form.createEl("img", { cls: "notenyang-capture", attr: { src: imageUrl, alt: t("pdfCapture") } });
     } else if (anchor.kind !== "document") {
       form.createEl("blockquote", {
-        cls: "siden-personal-card-quote",
+        cls: "notenyang-card-quote",
         text: anchor.quote.exact
       });
     }
@@ -1771,7 +1772,7 @@ var SidenSidebarView = class extends import_obsidian6.ItemView {
   renderDraftEditor(form, draft) {
     const { t } = this.plugin;
     const textarea = form.createEl("textarea", {
-      cls: "siden-personal-draft-textarea",
+      cls: "notenyang-draft-textarea",
       attr: {
         "aria-label": t("annotationText"),
         placeholder: t("addComment"),
@@ -1798,7 +1799,7 @@ var SidenSidebarView = class extends import_obsidian6.ItemView {
         this.cancelDraft();
       }
     });
-    const actions = form.createDiv({ cls: "siden-personal-draft-actions" });
+    const actions = form.createDiv({ cls: "notenyang-draft-actions" });
     const cancel = actions.createEl("button", { text: t("cancel") });
     cancel.addEventListener("click", () => this.cancelDraft());
     const save = actions.createEl("button", {
@@ -1894,7 +1895,7 @@ var SidenSidebarView = class extends import_obsidian6.ItemView {
   }
   focusDraft() {
     window.setTimeout(
-      () => this.containerEl.querySelector(".siden-personal-draft-textarea")?.focus()
+      () => this.containerEl.querySelector(".notenyang-draft-textarea")?.focus()
     );
   }
   renderToolbar(toolbar) {
@@ -1917,7 +1918,7 @@ var SidenSidebarView = class extends import_obsidian6.ItemView {
     const selected = [...scopes, ...files].find(({ value }) => value === this.viewScope) ?? scopes[0];
     this.viewScope = selected.value;
     const scope = toolbar.createEl("button", {
-      cls: "siden-personal-scope",
+      cls: "notenyang-scope",
       attr: {
         type: "button",
         "aria-label": t("chooseScope", { scope: selected.label }),
@@ -1925,15 +1926,15 @@ var SidenSidebarView = class extends import_obsidian6.ItemView {
         title: selected.path ?? selected.label
       }
     });
-    scope.createSpan({ cls: "siden-personal-scope-label", text: selected.label });
-    (0, import_obsidian6.setIcon)(scope.createSpan({ cls: "siden-personal-scope-icon" }), "chevron-down");
+    scope.createSpan({ cls: "notenyang-scope-label", text: selected.label });
+    (0, import_obsidian6.setIcon)(scope.createSpan({ cls: "notenyang-scope-icon" }), "chevron-down");
     scope.addEventListener("click", () => {
       const menu = new import_obsidian6.Menu().setUseNativeMenu(false);
       const addScope = ({ value, label }) => menu.addItem((item) =>
         item.setTitle(label).setChecked(value === this.viewScope).onClick(() => {
           this.viewScope = value;
           this.render();
-          this.containerEl.querySelector(".siden-personal-scope")?.focus();
+          this.containerEl.querySelector(".notenyang-scope")?.focus();
         })
       );
       scopes.forEach(addScope);
@@ -1956,7 +1957,7 @@ var SidenSidebarView = class extends import_obsidian6.ItemView {
   }
   createSearch(root) {
     const search = root.createEl("input", {
-      cls: "siden-personal-search",
+      cls: "notenyang-search",
       type: "search"
     });
     search.value = this.query;
@@ -2015,17 +2016,17 @@ ${item.sourcePath}`).includes(query);
   renderCard(parent, annotation) {
     const { t } = this.plugin;
     const card = parent.createDiv({
-      cls: `siden-personal-card siden-personal-status-${annotation.status}${annotation.id === this.activeId ? " is-active" : ""}`,
+      cls: `notenyang-card notenyang-status-${annotation.status}${annotation.id === this.activeId ? " is-active" : ""}`,
       attr: {
-        "data-siden-personal-id": annotation.id,
+        "data-notenyang-id": annotation.id,
         tabindex: "0",
         role: "group",
         "aria-label": t("openAnnotationIn", { path: annotation.sourcePath })
       }
     });
-    const header = card.createDiv({ cls: "siden-personal-card-header" });
+    const header = card.createDiv({ cls: "notenyang-card-header" });
     const dragHandle = header.createEl("span", {
-      cls: "siden-personal-drag-handle",
+      cls: "notenyang-drag-handle",
       attr: {
         draggable: "true",
         title: t("dragAnnotation"),
@@ -2042,10 +2043,10 @@ ${item.sourcePath}`).includes(query);
       event.stopPropagation();
     });
     const location = formatAnchorLocation(annotation.anchor, t);
-    header.createSpan({ cls: "siden-personal-card-location", text: this.plugin.settings.showCardLocation ? location : "" });
+    header.createSpan({ cls: "notenyang-card-location", text: this.plugin.settings.showCardLocation ? location : "" });
     if (annotation.status !== "open") {
       header.createSpan({
-        cls: "siden-personal-card-status",
+        cls: "notenyang-card-status",
         text: t(annotation.status)
       });
     }
@@ -2060,16 +2061,16 @@ ${item.sourcePath}`).includes(query);
     });
     if (annotation.anchor.kind === "pdf" && annotation.anchor.imagePath) {
       card.createEl("img", {
-        cls: "siden-personal-capture",
+        cls: "notenyang-capture",
         attr: { src: this.app.vault.adapter.getResourcePath(annotation.anchor.imagePath), alt: t("pdfCapture") }
       });
     } else if (annotation.anchor.kind !== "document") {
       card.createEl("blockquote", {
-        cls: "siden-personal-card-quote",
+        cls: "notenyang-card-quote",
         text: annotation.anchor.quote.exact
       });
     }
-    const comment = card.createDiv({ cls: "siden-personal-card-comment" });
+    const comment = card.createDiv({ cls: "notenyang-card-comment" });
     const editing = this.draft?.mode === "edit" && this.draft.annotation.id === annotation.id;
     comment.addEventListener("click", (event) => {
       if (editing || event.target?.closest?.("a, button, input, textarea, select, [contenteditable]")) return;
@@ -2091,13 +2092,13 @@ ${item.sourcePath}`).includes(query);
           this.beginEdit(annotation);
         }
       });
-      const body = comment.createDiv({ cls: "siden-personal-card-body markdown-rendered" });
+      const body = comment.createDiv({ cls: "notenyang-card-body markdown-rendered" });
       void import_obsidian6.MarkdownRenderer.render(this.app, annotation.body, body, annotation.sourcePath, this);
     }
     if (this.plugin.settings.showCardDate) {
       const created = new Date(annotation.createdAt);
       comment.createEl("time", {
-        cls: "siden-personal-card-date",
+        cls: "notenyang-card-date",
         text: Number.isNaN(created.getTime()) ? annotation.createdAt : created.toLocaleString(uiLanguage(this.plugin.settings)),
         attr: { datetime: annotation.createdAt, "aria-label": t("created") }
       });
@@ -2163,7 +2164,7 @@ ${item.sourcePath}`).includes(query);
 };
 
 // src/main.ts
-var SidenPlugin = class extends import_obsidian7.Plugin {
+var NoteNyangPlugin = class extends import_obsidian7.Plugin {
   store;
   settings = DEFAULT_SETTINGS;
   settingsQueue = Promise.resolve();
@@ -2206,21 +2207,21 @@ var SidenPlugin = class extends import_obsidian7.Plugin {
     this.pdfAdapter = new PdfAdapter(this);
     this.pdfAdapter.start();
     this.registerView(
-      SIDEN_VIEW_TYPE,
-      (leaf) => new SidenSidebarView(leaf, this)
+      NOTENYANG_VIEW_TYPE,
+      (leaf) => new NoteNyangSidebarView(leaf, this)
     );
     this.registerEditorExtension(createMarkdownExtension(this));
     this.registerMarkdownPostProcessor(
       (element, context) => processReadingView(element, context, this)
     );
-    this.addSettingTab(new SidenSettingTab(this.app, this));
+    this.addSettingTab(new NoteNyangSettingTab(this.app, this));
     this.annotationsRibbon = this.addRibbonIcon(
       "message-square-text",
       UI_TEXT.ribbonAnnotations[0],
       () => void this.openSidebar()
     );
     this.pdfCaptureRibbon = this.addRibbonIcon("scan", UI_TEXT.ribbonCapture[0], () => this.beginPdfRegionCapture());
-    this.pdfCaptureRibbon.toggleClass("siden-personal-ribbon-hidden", !this.settings.showPdfCaptureRibbon);
+    this.pdfCaptureRibbon.toggleClass("notenyang-ribbon-hidden", !this.settings.showPdfCaptureRibbon);
     this.updateRibbonLabels();
     this.registerCommands();
     this.registerEvent(
@@ -2341,10 +2342,10 @@ var SidenPlugin = class extends import_obsidian7.Plugin {
     for (const state of previewStates) {
       if (state.plugin === this) destroyPreviewState(state);
     }
-    document.body.style.removeProperty("--siden-personal-margin-width");
-    document.body.style.removeProperty("--siden-personal-highlight-color");
-    document.body.style.removeProperty("--siden-personal-highlight-opacity");
-    delete document.body.dataset.sidenPersonalForceWordBreaks;
+    document.body.style.removeProperty("--notenyang-margin-width");
+    document.body.style.removeProperty("--notenyang-highlight-color");
+    document.body.style.removeProperty("--notenyang-highlight-opacity");
+    delete document.body.dataset.notenyangForceWordBreaks;
   }
   updateSettings(changes) {
     const update = this.settingsQueue.then(async () => {
@@ -2357,26 +2358,26 @@ var SidenPlugin = class extends import_obsidian7.Plugin {
         this.updateRibbonLabels();
       }
       this.applyCssSettings();
-      this.pdfCaptureRibbon?.toggleClass("siden-personal-ribbon-hidden", !next.showPdfCaptureRibbon);
+      this.pdfCaptureRibbon?.toggleClass("notenyang-ribbon-hidden", !next.showPdfCaptureRibbon);
       this.refresh();
     });
     this.settingsQueue = update.catch(() => {});
     return update;
   }
   async openSidebar() {
-    let leaf = this.app.workspace.getLeavesOfType(SIDEN_VIEW_TYPE)[0];
+    let leaf = this.app.workspace.getLeavesOfType(NOTENYANG_VIEW_TYPE)[0];
     if (!leaf) {
       leaf = this.app.workspace.getRightLeaf(false);
-      await leaf?.setViewState({ type: SIDEN_VIEW_TYPE, active: true });
+      await leaf?.setViewState({ type: NOTENYANG_VIEW_TYPE, active: true });
     }
     if (!leaf) return null;
     await this.app.workspace.revealLeaf(leaf);
     this.refreshContext();
-    return leaf.view instanceof SidenSidebarView ? leaf.view : null;
+    return leaf.view instanceof NoteNyangSidebarView ? leaf.view : null;
   }
   areMarginsSuppressed() {
     const workspace = this.app.workspace;
-    return workspace.getLeavesOfType(SIDEN_VIEW_TYPE).some((leaf) => {
+    return workspace.getLeavesOfType(NOTENYANG_VIEW_TYPE).some((leaf) => {
       let dock = leaf.parent;
       while (dock && dock !== workspace.rightSplit && dock !== workspace.leftSplit) {
         dock = dock.parent;
@@ -2447,8 +2448,8 @@ var SidenPlugin = class extends import_obsidian7.Plugin {
     this.lastMarginsSuppressed = suppressed;
     this.contentRefreshPending = false;
     if (contentChanged || pathChanged) {
-      for (const { view } of workspace.getLeavesOfType(SIDEN_VIEW_TYPE)) {
-        if (view instanceof SidenSidebarView && (contentChanged || view.viewScope === "current")) view.refresh();
+      for (const { view } of workspace.getLeavesOfType(NOTENYANG_VIEW_TYPE)) {
+        if (view instanceof NoteNyangSidebarView && (contentChanged || view.viewScope === "current")) view.refresh();
       }
     }
     if (contentChanged || marginsChanged || pathChanged && currentPath && this.store.hasSource(currentPath)) {
@@ -2574,7 +2575,7 @@ var SidenPlugin = class extends import_obsidian7.Plugin {
       }
       lines.push(annotation.body, "", "---", "");
     }
-    const directory = ".siden-personal/exports";
+    const directory = DEFAULT_EXPORT_DIRECTORY;
     if (!await this.app.vault.adapter.exists(directory)) {
       await this.app.vault.adapter.mkdir(directory);
     }
@@ -2593,7 +2594,7 @@ var SidenPlugin = class extends import_obsidian7.Plugin {
     sidebar.beginCreate(input, imageDataUrl);
   }
   async reconcileFile(file) {
-    if (file.path.startsWith(".siden-personal/") || !this.store.hasSource(file.path)) return;
+    if (file.path.startsWith(STORAGE_DIRECTORY + "/") || !this.store.hasSource(file.path)) return;
     await this.store.reconcileMarkdownSource(
       file.path,
       await this.app.vault.cachedRead(file)
@@ -2601,19 +2602,19 @@ var SidenPlugin = class extends import_obsidian7.Plugin {
   }
   applyCssSettings() {
     document.body.style.setProperty(
-      "--siden-personal-margin-width",
+      "--notenyang-margin-width",
       `${this.settings.marginWidth}px`
     );
     document.body.style.setProperty(
-      "--siden-personal-highlight-color",
+      "--notenyang-highlight-color",
       this.settings.highlightColor
     );
     document.body.style.setProperty(
-      "--siden-personal-highlight-opacity",
+      "--notenyang-highlight-opacity",
       String(this.settings.highlightOpacity)
     );
-    document.body.dataset.sidenPersonalMarginSide = this.settings.marginSide;
-    document.body.dataset.sidenPersonalForceWordBreaks = String(
+    document.body.dataset.notenyangMarginSide = this.settings.marginSide;
+    document.body.dataset.notenyangForceWordBreaks = String(
       this.settings.forceLongWordBreaks
     );
   }
