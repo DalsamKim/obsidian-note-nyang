@@ -164,7 +164,8 @@
   text-transform: capitalize;
 }
 
-.notenyang-sidebar .notenyang-card-quote {
+.notenyang-sidebar .notenyang-card-quote,
+.rp-unified-draft .notenyang-card-quote {
   border: 0;
   box-sizing: border-box;
   color: var(--text-muted);
@@ -302,14 +303,14 @@
 .notenyang-highlight-both {
   background: color-mix(
     in srgb,
-    var(--notenyang-highlight-color) calc(var(--notenyang-highlight-opacity) * 100%),
+    var(--notenyang-mark-color, var(--notenyang-highlight-color)) calc(var(--notenyang-highlight-opacity) * 100%),
     transparent
   );
 }
 
 .notenyang-highlight-underline,
 .notenyang-highlight-both {
-  text-decoration-color: var(--notenyang-highlight-color);
+  text-decoration-color: var(--notenyang-mark-color, var(--notenyang-highlight-color));
   text-decoration-line: underline;
   text-decoration-thickness: 2px;
   text-underline-offset: 2px;
@@ -437,4 +438,934 @@
 
 .notenyang-ribbon-hidden {
   display: none !important;
+}
+
+
+/* NoteNyang PDF tools include adaptations from PDF Research Reader 1.0.1.
+MIT License
+
+Copyright (c) 2026 PDF Research Reader contributors
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+PDF Research Reader uses the PDF.js library supplied by Obsidian at runtime.
+The scoped text-layer CSS and mobile-page viewport geometry are adapted from Mozilla PDF.js.
+Copyright Mozilla Foundation and contributors. Licensed under Apache-2.0.
+Source: https://github.com/mozilla/pdf.js
+
+
+                                 Apache License
+                           Version 2.0, January 2004
+                        http://www.apache.org/licenses/
+
+   TERMS AND CONDITIONS FOR USE, REPRODUCTION, AND DISTRIBUTION
+
+   1. Definitions.
+
+      "License" shall mean the terms and conditions for use, reproduction,
+      and distribution as defined by Sections 1 through 9 of this document.
+
+      "Licensor" shall mean the copyright owner or entity authorized by
+      the copyright owner that is granting the License.
+
+      "Legal Entity" shall mean the union of the acting entity and all
+      other entities that control, are controlled by, or are under common
+      control with that entity. For the purposes of this definition,
+      "control" means (i) the power, direct or indirect, to cause the
+      direction or management of such entity, whether by contract or
+      otherwise, or (ii) ownership of fifty percent (50%) or more of the
+      outstanding shares, or (iii) beneficial ownership of such entity.
+
+      "You" (or "Your") shall mean an individual or Legal Entity
+      exercising permissions granted by this License.
+
+      "Source" form shall mean the preferred form for making modifications,
+      including but not limited to software source code, documentation
+      source, and configuration files.
+
+      "Object" form shall mean any form resulting from mechanical
+      transformation or translation of a Source form, including but
+      not limited to compiled object code, generated documentation,
+      and conversions to other media types.
+
+      "Work" shall mean the work of authorship, whether in Source or
+      Object form, made available under the License, as indicated by a
+      copyright notice that is included in or attached to the work
+      (an example is provided in the Appendix below).
+
+      "Derivative Works" shall mean any work, whether in Source or Object
+      form, that is based on (or derived from) the Work and for which the
+      editorial revisions, annotations, elaborations, or other modifications
+      represent, as a whole, an original work of authorship. For the purposes
+      of this License, Derivative Works shall not include works that remain
+      separable from, or merely link (or bind by name) to the interfaces of,
+      the Work and Derivative Works thereof.
+
+      "Contribution" shall mean any work of authorship, including
+      the original version of the Work and any modifications or additions
+      to that Work or Derivative Works thereof, that is intentionally
+      submitted to Licensor for inclusion in the Work by the copyright owner
+      or by an individual or Legal Entity authorized to submit on behalf of
+      the copyright owner. For the purposes of this definition, "submitted"
+      means any form of electronic, verbal, or written communication sent
+      to the Licensor or its representatives, including but not limited to
+      communication on electronic mailing lists, source code control systems,
+      and issue tracking systems that are managed by, or on behalf of, the
+      Licensor for the purpose of discussing and improving the Work, but
+      excluding communication that is conspicuously marked or otherwise
+      designated in writing by the copyright owner as "Not a Contribution."
+
+      "Contributor" shall mean Licensor and any individual or Legal Entity
+      on behalf of whom a Contribution has been received by Licensor and
+      subsequently incorporated within the Work.
+
+   2. Grant of Copyright License. Subject to the terms and conditions of
+      this License, each Contributor hereby grants to You a perpetual,
+      worldwide, non-exclusive, no-charge, royalty-free, irrevocable
+      copyright license to reproduce, prepare Derivative Works of,
+      publicly display, publicly perform, sublicense, and distribute the
+      Work and such Derivative Works in Source or Object form.
+
+   3. Grant of Patent License. Subject to the terms and conditions of
+      this License, each Contributor hereby grants to You a perpetual,
+      worldwide, non-exclusive, no-charge, royalty-free, irrevocable
+      (except as stated in this section) patent license to make, have made,
+      use, offer to sell, sell, import, and otherwise transfer the Work,
+      where such license applies only to those patent claims licensable
+      by such Contributor that are necessarily infringed by their
+      Contribution(s) alone or by combination of their Contribution(s)
+      with the Work to which such Contribution(s) was submitted. If You
+      institute patent litigation against any entity (including a
+      cross-claim or counterclaim in a lawsuit) alleging that the Work
+      or a Contribution incorporated within the Work constitutes direct
+      or contributory patent infringement, then any patent licenses
+      granted to You under this License for that Work shall terminate
+      as of the date such litigation is filed.
+
+   4. Redistribution. You may reproduce and distribute copies of the
+      Work or Derivative Works thereof in any medium, with or without
+      modifications, and in Source or Object form, provided that You
+      meet the following conditions:
+
+      (a) You must give any other recipients of the Work or
+          Derivative Works a copy of this License; and
+
+      (b) You must cause any modified files to carry prominent notices
+          stating that You changed the files; and
+
+      (c) You must retain, in the Source form of any Derivative Works
+          that You distribute, all copyright, patent, trademark, and
+          attribution notices from the Source form of the Work,
+          excluding those notices that do not pertain to any part of
+          the Derivative Works; and
+
+      (d) If the Work includes a "NOTICE" text file as part of its
+          distribution, then any Derivative Works that You distribute must
+          include a readable copy of the attribution notices contained
+          within such NOTICE file, excluding those notices that do not
+          pertain to any part of the Derivative Works, in at least one
+          of the following places: within a NOTICE text file distributed
+          as part of the Derivative Works; within the Source form or
+          documentation, if provided along with the Derivative Works; or,
+          within a display generated by the Derivative Works, if and
+          wherever such third-party notices normally appear. The contents
+          of the NOTICE file are for informational purposes only and
+          do not modify the License. You may add Your own attribution
+          notices within Derivative Works that You distribute, alongside
+          or as an addendum to the NOTICE text from the Work, provided
+          that such additional attribution notices cannot be construed
+          as modifying the License.
+
+      You may add Your own copyright statement to Your modifications and
+      may provide additional or different license terms and conditions
+      for use, reproduction, or distribution of Your modifications, or
+      for any such Derivative Works as a whole, provided Your use,
+      reproduction, and distribution of the Work otherwise complies with
+      the conditions stated in this License.
+
+   5. Submission of Contributions. Unless You explicitly state otherwise,
+      any Contribution intentionally submitted for inclusion in the Work
+      by You to the Licensor shall be under the terms and conditions of
+      this License, without any additional terms or conditions.
+      Notwithstanding the above, nothing herein shall supersede or modify
+      the terms of any separate license agreement you may have executed
+      with Licensor regarding such Contributions.
+
+   6. Trademarks. This License does not grant permission to use the trade
+      names, trademarks, service marks, or product names of the Licensor,
+      except as required for reasonable and customary use in describing the
+      origin of the Work and reproducing the content of the NOTICE file.
+
+   7. Disclaimer of Warranty. Unless required by applicable law or
+      agreed to in writing, Licensor provides the Work (and each
+      Contributor provides its Contributions) on an "AS IS" BASIS,
+      WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+      implied, including, without limitation, any warranties or conditions
+      of TITLE, NON-INFRINGEMENT, MERCHANTABILITY, or FITNESS FOR A
+      PARTICULAR PURPOSE. You are solely responsible for determining the
+      appropriateness of using or redistributing the Work and assume any
+      risks associated with Your exercise of permissions under this License.
+
+   8. Limitation of Liability. In no event and under no legal theory,
+      whether in tort (including negligence), contract, or otherwise,
+      unless required by applicable law (such as deliberate and grossly
+      negligent acts) or agreed to in writing, shall any Contributor be
+      liable to You for damages, including any direct, indirect, special,
+      incidental, or consequential damages of any character arising as a
+      result of this License or out of the use or inability to use the
+      Work (including but not limited to damages for loss of goodwill,
+      work stoppage, computer failure or malfunction, or any and all
+      other commercial damages or losses), even if such Contributor
+      has been advised of the possibility of such damages.
+
+   9. Accepting Warranty or Additional Liability. While redistributing
+      the Work or Derivative Works thereof, You may choose to offer,
+      and charge a fee for, acceptance of support, warranty, indemnity,
+      or other liability obligations and/or rights consistent with this
+      License. However, in accepting such obligations, You may act only
+      on Your own behalf and on Your sole responsibility, not on behalf
+      of any other Contributor, and only if You agree to indemnify,
+      defend, and hold each Contributor harmless for any liability
+      incurred by, or claims asserted against, such Contributor by reason
+      of your accepting any such warranty or additional liability.
+
+   END OF TERMS AND CONDITIONS
+*/
+/* PDF Research Reader. Text layer rules adapted from Mozilla PDF.js (Apache-2.0).
+   See THIRD-PARTY-NOTICES.txt. All selectors are scoped to this plugin. */
+.rp-reader, .rp-annotations { box-sizing: border-box; height: 100%; min-height: 0; padding: 0 !important; display: flex; flex-direction: column; }
+.rp-reader:not(.rp-native-reader) *, .rp-annotations *, .rp-modal * { box-sizing: border-box; }
+.rp-file-name { flex: 0 0 auto; display: block; width: 100%; min-height: 26px; height: 26px; padding: 3px 12px; text-align: left; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; border: 0; border-radius: 0; box-shadow: none; background: var(--background-primary); color: var(--text-muted); font-size: 12px; cursor: context-menu; }
+.rp-toolbar { display: flex; align-items: center; flex-wrap: wrap; gap: 5px; padding: 7px 9px; border-bottom: 1px solid var(--background-modifier-border); background: var(--background-primary); flex: 0 0 auto; z-index: 3; }
+.rp-button { cursor: pointer; font-size: var(--font-ui-small, 13px); padding: 4px 9px; min-height: 29px; white-space: nowrap; }
+.rp-reader .rp-select, .rp-annotations .rp-select { max-width: 100%; min-height: 29px; font-size: var(--font-ui-small, 13px); }
+.rp-page-input { width: 62px !important; min-width: 45px; text-align: center; }
+.rp-page-count { color: var(--text-muted); font-size: 12px; }
+.rp-palette { display: inline-flex; gap: 4px; padding: 0 3px; }
+.rp-palette button { min-height: 22px; width: 22px; height: 22px; min-width: 22px; padding: 0; border-radius: 50%; border: 2px solid transparent; box-shadow: none; }
+.rp-palette button.is-active { border-color: var(--text-normal); outline: 2px solid var(--background-primary); outline-offset: -4px; }
+.rp-button.is-active { background: var(--interactive-accent); color: var(--text-on-accent); }
+.rp-pdf-scroller { position: relative; flex: 1 1 0; overflow: auto; min-height: 100px; background: var(--background-secondary); overscroll-behavior: contain; }
+.rp-page-stack { min-width: 100%; width: max-content; padding: 10px 12px 30px; }
+.rp-page-slot { display: flex; flex-direction: column; align-items: center; margin: 0 auto 9px; width: 100%; }
+.rp-page { position: relative; flex: 0 0 auto; overflow: hidden; background: white; color: black; box-shadow: 0 1px 6px #0003; }
+.rp-page-placeholder { position: absolute; inset: 0; display: grid; place-content: center; color: #888; font-size: 14px; }
+.rp-page-label { padding: 5px 0 0; font-size: 11px; color: var(--text-muted); user-select: none; }
+.rp-surface { position: absolute; color-scheme: only light; --scale-round-x: 1px; --scale-round-y: 1px; --user-unit: 1; }
+.rp-page-canvas { position: absolute; inset: 0; display: block; max-width: none !important; max-height: none !important; }
+.rp-reader:not(.rp-native-reader) .textLayer { position: absolute; text-align: initial; inset: 0; overflow: clip; line-height: 1; opacity: 1; text-size-adjust: none; forced-color-adjust: none; transform-origin: 0 0; caret-color: black; z-index: 2; user-select: text; -webkit-user-select: text; --min-font-size: 1; --text-scale-factor: calc(var(--total-scale-factor) * var(--min-font-size)); --min-font-size-inv: calc(1 / var(--min-font-size)); }
+.rp-reader:not(.rp-native-reader) .textLayer :is(span, br) { color: transparent; position: absolute; white-space: pre; cursor: text; transform-origin: 0% 0%; }
+.rp-reader:not(.rp-native-reader) .textLayer > :not(.markedContent), .rp-reader:not(.rp-native-reader) .textLayer .markedContent span:not(.markedContent) { z-index: 1; --font-height: 0; font-size: calc(var(--text-scale-factor) * var(--font-height)); --scale-x: 1; --rotate: 0deg; transform: rotate(var(--rotate)) scaleX(var(--scale-x)) scale(var(--min-font-size-inv)); }
+.rp-reader:not(.rp-native-reader) .textLayer .markedContent { display: contents; }
+.rp-reader:not(.rp-native-reader) .textLayer ::selection { background: #447dff55; }
+.rp-reader:not(.rp-native-reader) .textLayer br::selection { background: transparent; }
+.rp-reader:not(.rp-native-reader) .textLayer span[role="img"] { user-select: none; cursor: default; }
+.rp-reader:not(.rp-native-reader) .textLayer .endOfContent { display: block; position: absolute; inset: 100% 0 0; z-index: 0; cursor: default; user-select: none; }
+.rp-marks { position: absolute; inset: 0; pointer-events: none; z-index: 3; }
+.rp-mark { position: absolute; pointer-events: none; }
+.rp-reader[data-mode="read"] .rp-mark { pointer-events: auto; cursor: grab; user-select: none; }
+.rp-reader[data-mode="read"] .rp-mark:active { cursor: grabbing; }
+.rp-mark-highlight { background: transparent; }
+.rp-highlight-paint { position:absolute; inset:0; width:100%; height:100%; pointer-events:none; overflow:visible; mix-blend-mode:multiply; }
+.rp-mark-capture { border: 2px solid var(--rp-color); background: transparent; }
+.rp-mark-note { display: grid; place-items: center; font: bold 17px sans-serif; background: var(--rp-color); color: #202020; border-radius: 3px; border: 1px solid #0003; box-shadow: 0 1px 4px #0002; }
+.rp-reader[data-mode="capture"] .textLayer, .rp-reader[data-mode="note"] .textLayer { pointer-events: none; user-select: none; }
+.rp-reader[data-mode="capture"] .rp-surface { cursor: crosshair; touch-action: none; }
+.rp-reader[data-mode="gesture"] .rp-pdf-scroller, .rp-reader[data-mode="gesture"] .rp-surface, .rp-mobile[data-mode="highlight"] .rp-pdf-scroller { touch-action: none; }
+.rp-reader[data-mode="gesture"] .textLayer, .rp-reader[data-mode="gesture"] .textLayer span { user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; cursor: text; }
+.rp-reader.rp-precise-selection .textLayer ::selection { background: transparent; }
+.rp-text-selection-preview { position: absolute; inset: 0; z-index: 5; pointer-events: none; }
+.rp-text-selection-preview > div { position: absolute; background: #447dff55; border-radius: 2px; }
+.rp-reader[data-mode="gesture"] .rp-mark-note, .rp-reader[data-mode="gesture"] .rp-mark-capture { pointer-events: auto; cursor: pointer; }
+.rp-reader[data-mode="note"] .rp-surface { cursor: copy; }
+.rp-selection-box { position: absolute; border: 2px dashed #3479dc; background: #3479dc22; pointer-events: none; z-index: 6; }
+.rp-ink-toolbar { display: flex; align-items: center; gap: 5px; flex-wrap: wrap; padding: 4px 8px; border-bottom: 1px solid var(--background-modifier-border); background: var(--background-primary); flex: 0 0 auto; }
+.rp-ink-toolbar[hidden] { display: none; }
+.rp-ink-count { font-size: 12px; color: var(--text-muted); padding: 0 4px; }
+.rp-ink-preview { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 6; pointer-events: none; }
+.rp-ink-svg { display: block; width: 100%; height: 100%; pointer-events: none; overflow: visible; }
+.rp-mark-drawing { background: transparent; border: 0; }
+.rp-mark-drawing.rp-flash { outline: 2px solid var(--interactive-accent); }
+.rp-reader[data-mode="gesture"] .rp-mark-drawing { pointer-events: auto; cursor: pointer; }
+.rp-reader[data-mode="draw"] .rp-pdf-scroller { touch-action: none; overscroll-behavior: contain; -webkit-touch-callout: none; }
+.rp-reader[data-mode="draw"] .textLayer, .rp-reader[data-mode="draw"] .textLayer span { user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; }
+.rp-reader[data-mode="draw"] .rp-surface { cursor: crosshair; }
+.rp-mobile .rp-ink-toolbar { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 3px; padding: 3px 6px; }
+.rp-mobile .rp-ink-toolbar[hidden] { display: none; }
+.rp-mobile.rp-reader .rp-ink-toolbar .rp-select { width: 100%; min-width: 0; max-width: none; height: 30px; min-height: 30px; padding: 2px; font-size: 12px; }
+.rp-mobile .rp-ink-count { grid-column: span 2; }
+.rp-status { flex: 0 0 auto; padding: 4px 10px; min-height: 23px; font-size: 11px; color: var(--text-muted); background: var(--background-primary); border-top: 1px solid var(--background-modifier-border); }
+.rp-exit-focus { display: none; position: absolute; top: 9px; right: 18px; z-index: 8; opacity: .65; }
+.rp-focus { position: relative; }
+.rp-focus .rp-toolbar, .rp-focus .rp-status { display: none; }
+.rp-focus .rp-file-name { display: none; }
+.rp-focus .rp-exit-focus { display: block; }
+.rp-focus .rp-exit-focus:hover { opacity: 1; }
+.rp-render-error { position: absolute; inset: 20px; color: #a12626; font-size: 14px; }
+.rp-flash { outline: 3px solid #ed7c20; outline-offset: 3px; opacity: .7; }
+.rp-tooltip { position: fixed; z-index: 10000; pointer-events: none; max-width: min(390px, 85vw); max-height: 300px; overflow: hidden; background: var(--background-primary); color: var(--text-normal); border: 1px solid var(--background-modifier-border); border-radius: 8px; box-shadow: 0 5px 22px #0003; padding: 12px 14px; font-size: 13px; white-space: pre-wrap; overflow-wrap: anywhere; }
+.rp-tooltip p { margin: 5px 0 9px; }
+.rp-annotation-popover { position: fixed; z-index: 10000; box-sizing: border-box; width: min(380px, calc(100vw - 20px)); max-height: min(560px, 75vh); overflow: auto; padding: 10px 12px; background: var(--background-primary); color: var(--text-normal); border: 1px solid var(--background-modifier-border); border-radius: 9px; box-shadow: 0 5px 24px #0003; }
+.rp-annotation-popover *, .rp-inline-field * { box-sizing: border-box; }
+.rp-annotation-popover [hidden], .rp-inline-field [hidden] { display: none !important; }
+.rp-popover-tools { display: flex; gap: 4px; align-items: center; margin-bottom: 7px; }
+.rp-popover-tools .rp-palette { flex: 1; }
+.rp-popover-tools .rp-icon-button { display: inline-flex; align-items: center; justify-content: center; width: 25px; height: 25px; padding: 3px; min-height: 25px; border: 0; box-shadow: none; background: transparent; color: var(--text-muted); }
+.rp-popover-tools .rp-delete-button:hover { color: var(--text-error, #ce4545); }
+.rp-popover-body { display: flex; flex-direction: column; gap: 9px; }
+.rp-popover-image { max-width: 100%; max-height: 180px; object-fit: contain; background: white; }
+.rp-inline-field { position: relative; min-width: 0; }
+.rp-inline-status { display: block; text-align: right; font-size: 10px; line-height: 1.4; color: var(--text-muted); margin: 0; }
+.rp-inline-status:empty { display: none; }
+.rp-inline-field .rp-inline-input { display: block; width: 100%; min-height: 20px !important; max-height: 260px; margin: 0; padding: 0; resize: none; border: 0; border-radius: 3px; box-shadow: none; background: transparent; color: var(--text-normal); font: inherit; font-size: 12px; line-height: 1.5; white-space: pre-wrap; overflow-wrap: anywhere; }
+.rp-inline-field .rp-inline-input:focus { outline: 1px solid var(--interactive-accent); outline-offset: 3px; }
+.rp-inline-field .rp-inline-input::placeholder { color: var(--text-faint, #8993a2); font-size: 11px; }
+.rp-inline-field .rp-card-text { margin: 0; }
+.rp-annotation-popover .rp-card-text { max-height: 125px; overflow: auto; }
+.rp-list-header { flex: 0 1 auto; max-height: 65%; overflow: auto; padding: 12px; border-bottom: 1px solid var(--background-modifier-border); display: flex; flex-direction: column; gap: 8px; }
+.rp-list-top { display: flex; align-items: center; gap: 6px; min-width: 0; }
+.rp-list-top .rp-panel-tabs { flex: 1; min-width: 0; }
+.rp-list-top > .rp-icon-button { flex: 0 0 29px; width: 29px; padding: 4px; }
+.rp-list-top > .rp-button { flex-shrink: 0; }
+.rp-actions { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; }
+.rp-filters { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)) minmax(0, 1.7fr); align-items: center; gap: 6px; }
+.rp-filters > .rp-select, .rp-filters > .rp-button { width: 100%; min-width: 0; padding-inline: 5px; overflow: hidden; text-overflow: ellipsis; }
+.rp-search { grid-column: 1 / -1; width: 100%; min-width: 0; }
+.rp-list-count { color: var(--text-muted); font-size: 12px; }
+.rp-annotations [hidden] { display: none !important; }
+.rp-panel-tabs { display: flex; gap: 5px; }
+.rp-panel-tabs button { flex: 1; }
+.rp-outline-pane { flex: 1 1 0; min-height: 64px; padding: 10px 12px 20px; overflow: auto; }
+.rp-outline-controls { display: flex; flex-direction: column; gap: 7px; margin-bottom: 14px; }
+.rp-outline-current { color: var(--text-muted); font-size: 12px; }
+.rp-outline-section { margin-bottom: 18px; }
+.rp-outline-section h3 { font-size: 13px; margin: 10px 0 6px; }
+.rp-outline-section .rp-empty { padding: 3px 0; font-size: 12px; }
+.rp-outline-tree { list-style: none; padding: 0; margin: 0; }
+.rp-outline-tree .rp-outline-tree { padding-left: 13px; border-left: 1px solid var(--background-modifier-border); margin-left: 5px; }
+.rp-outline-tree summary { cursor: pointer; }
+.rp-outline-tree summary .rp-outline-row { display: inline-flex; width: calc(100% - 20px); vertical-align: middle; }
+.rp-outline-row { display: flex; align-items: center; gap: 3px; min-height: 30px; }
+.rp-outline-row .rp-outline-link { display: flex; align-items: baseline; gap: 6px; flex: 1; min-width: 0; height: auto; padding: 6px; border: 0; box-shadow: none; background: transparent; white-space: normal; text-align: left; }
+.rp-outline-row .rp-outline-link:hover { background: var(--background-modifier-hover, #8882); }
+.rp-outline-row .rp-outline-link.is-current { background: var(--background-modifier-active-hover, #5181c620); color: var(--text-accent, #3869b7); }
+.rp-outline-title { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+.rp-outline-page { flex: 0 0 auto; color: var(--text-muted); font-size: 10px; white-space: nowrap; }
+.rp-outline-modal label { display: block; font-weight: 600; margin: 12px 0 6px; }
+.rp-outline-title-input { width: 100%; }
+.rp-outline-modal .rp-actions { margin-top: 18px; justify-content: flex-end; }
+.rp-list-scroller { flex: 1 1 0; min-height: 64px; overflow: auto; overflow-anchor: none; padding: 0 10px; }
+.rp-list-spacer { position: relative; min-height: 60px; margin-top: 10px; }
+.rp-list-rows { position: absolute; top: 0; left: 0; right: 0; }
+.rp-card { border: 1px solid var(--background-modifier-border); border-left: 4px solid var(--rp-color); border-radius: 7px; padding: 9px 10px; margin-bottom: 10px; display: flex; flex-direction: column; gap: 7px; background: var(--background-primary); }
+.rp-card-header { display: flex; align-items: center; gap: 6px; min-height: 24px; flex: 0 0 auto; }
+.rp-card-meta { min-width: 0; flex: 1 1 auto; font-size: 11px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rp-card-tools { display: flex; flex: 0 0 auto; gap: 2px; margin-left: auto; }
+.rp-card-tools .rp-icon-button { display: inline-flex; align-items: center; justify-content: center; padding: 4px; width: 25px; height: 25px; min-height: 25px; border: 0; box-shadow: none; background: transparent; color: var(--text-muted); }
+.rp-card-tools .rp-icon-button:hover { background: var(--background-modifier-hover, #8882); color: var(--text-normal); }
+.rp-card-tools .rp-delete-button:hover { color: var(--text-error, #ce4545); }
+.rp-icon-button svg { width: 15px; height: 15px; }
+.rp-drag { cursor: grab; padding: 0 5px; font-size: 21px; color: var(--text-muted); user-select: none; }
+.rp-card-text, .rp-card-comment { margin: 0; font-size: 12px; line-height: 1.5; white-space: pre-wrap; overflow-wrap: anywhere; user-select: text; cursor: text; }
+.rp-card-text { border-left: 2px solid var(--background-modifier-border); padding-left: 8px; }
+.rp-card-comment { color: var(--text-muted); }
+.rp-card-comment.is-empty { font-size: 11px; color: var(--text-faint, #8993a2); }
+.rp-card-image { object-fit: contain; width: 100%; max-height: 100px; min-height: 45px; flex: 0 1 auto; background: white; border-radius: 3px; }
+.rp-conflict { font-size: 11px; color: var(--text-warning, #a55f16); }
+.rp-empty { color: var(--text-muted); padding: 16px 3px; font-size: 13px; }
+.rp-modal label { display: block; margin: 12px 0 6px; font-weight: 600; }
+.rp-original { max-height: 200px; overflow: auto; margin: 10px 0; padding: 8px 12px; white-space: pre-wrap; font-size: 13px; }
+.rp-comment-input { width: 100%; min-height: 150px; resize: vertical; font: inherit; }
+.rp-original-input { width: 100%; min-height: 90px; resize: vertical; font: inherit; }
+.rp-modal .rp-actions { margin-top: 12px; justify-content: flex-end; }
+.rp-modal-image { display: block; max-width: 100%; max-height: 260px; object-fit: contain; background: white; margin: 10px 0; }
+.rp-outline { list-style: none; padding-left: 14px; }
+.rp-outline button, .rp-search-results button { display: block; white-space: normal; text-align: left; height: auto; margin: 5px 0; }
+.rp-search-results { max-height: 55vh; overflow: auto; }
+.rp-copy-text { display: block; width: 100%; min-height: 160px; margin-bottom: 12px; font-size: 16px; user-select: text; -webkit-user-select: text; }
+.rp-mobile [hidden] { display: none !important; }
+.rp-mobile.rp-reader .rp-file-name { height: 26px; min-height: 26px; padding: 3px 8px; font-size: 12px; line-height: 20px; }
+.rp-mobile .rp-button, .rp-mobile-popover .rp-button { height: auto; min-height: 32px; min-width: 0; padding: 4px 8px; font-size: 14px; line-height: 20px; border-radius: 6px; box-shadow: none; touch-action: manipulation; user-select: none; -webkit-user-select: none; }
+.rp-mobile .rp-icon-button, .rp-mobile-popover .rp-icon-button { display: inline-flex; align-items: center; justify-content: center; flex: 0 0 auto; width: 36px; min-width: 36px; height: 36px; min-height: 36px; padding: 6px; color: var(--text-normal); --icon-size: 24px; --icon-stroke: 2; }
+.rp-mobile .rp-icon-button svg, .rp-mobile-popover .rp-icon-button svg { width: 24px !important; height: 24px !important; flex: 0 0 24px; stroke-width: 2; pointer-events: none; }
+.rp-mobile .rp-icon-button.is-active { color: var(--text-on-accent); }
+.rp-mobile.rp-reader .rp-toolbar { flex-wrap: nowrap; overflow: hidden; gap: 3px; padding: 3px 6px; }
+.rp-mobile.rp-reader .rp-toolbar > * { flex-shrink: 0; }
+.rp-mobile.rp-reader .rp-toolbar > .rp-icon-button { width: 30px; min-width: 30px; height: 32px; min-height: 32px; padding: 3px; }
+.rp-mobile.rp-reader .rp-toolbar .rp-page-input { width: 40px !important; min-width: 40px; height: 32px; min-height: 32px; padding: 3px; font-size: 16px; }
+.rp-mobile.rp-reader .rp-toolbar .rp-page-count { font-size: 12px; min-width: 27px; }
+.rp-mobile.rp-reader .rp-toolbar .rp-select { flex: 1 1 74px; width: 74px; min-width: 0; max-width: 110px; height: 32px; min-height: 32px; padding: 3px 5px; font-size: 13px; }
+.rp-mobile-toolbar { display: flex; justify-content: space-around; gap: 4px; flex: 0 0 auto; padding: 2px 6px; background: var(--background-primary); border-bottom: 1px solid var(--background-modifier-border); }
+.rp-focus .rp-mobile-toolbar { display: none; }
+.rp-mobile .rp-drag, .rp-mobile-popover .rp-drag { display: none; }
+.rp-mobile .rp-status { font-size: 11px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rp-mobile .textLayer { -webkit-user-select: text; }
+.rp-mobile[data-mode="read"] .textLayer span { -webkit-user-select: text; -webkit-touch-callout: default; }
+.rp-mobile[data-mode="gesture"] .textLayer, .rp-mobile[data-mode="gesture"] .textLayer span,
+.rp-mobile[data-mode="highlight"] .textLayer, .rp-mobile[data-mode="highlight"] .textLayer span { user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; }
+.rp-mobile[data-mode="gesture"] .rp-pdf-scroller, .rp-mobile[data-mode="highlight"] .rp-pdf-scroller,
+.rp-mobile[data-mode="capture"] .rp-pdf-scroller { -webkit-touch-callout: none; overscroll-behavior: contain; }
+.rp-mobile .rp-mark { cursor: pointer; }
+.rp-mobile .rp-list-header { max-height: 55%; padding: 6px 8px; gap: 5px; }
+.rp-mobile .rp-list-back { align-self: flex-start; text-align: left; min-height: 28px; padding: 2px 4px; font-size: 13px; }
+.rp-mobile .rp-panel-tabs button { flex: 0 0 auto; min-width: 44px; padding: 4px 7px; font-size: 13px; }
+.rp-mobile .rp-list-top { gap: 4px; }
+.rp-mobile .rp-list-top > .rp-icon-button { flex-basis: 36px; width: 36px; }
+.rp-mobile .rp-list-top > .rp-button:not(.rp-icon-button) { font-size: 13px; padding-inline: 6px; }
+.rp-mobile .rp-filters { gap: 4px; grid-template-columns: repeat(3, minmax(0, 1fr)) minmax(0, 1.35fr); }
+.rp-mobile .rp-filters > .rp-select, .rp-mobile .rp-filters > .rp-button { height: 32px; min-height: 32px; padding: 3px; font-size: 13px; line-height: 20px; }
+.rp-mobile .rp-filters .rp-search { height: 32px; min-height: 32px; padding: 4px 7px; font-size: 16px; }
+.rp-mobile .rp-list-header > .rp-select { height: 30px; min-height: 30px; font-size: 13px; }
+.rp-mobile .rp-card-tools .rp-icon-button { min-width: 36px; width: 36px; min-height: 36px; }
+.rp-mobile .rp-card-tools .rp-source-link { width: auto; min-width: 64px; gap: 4px; padding: 4px 6px; font-size: 13px; color: var(--text-accent, var(--interactive-accent)); }
+.rp-mobile .rp-card-tools .rp-source-link svg { width: 22px !important; height: 22px !important; flex-basis: 22px; }
+.rp-mobile .rp-card { padding: 8px; gap: 6px; margin-bottom: 8px; }
+.rp-mobile .rp-inline-input, .rp-mobile-popover .rp-inline-input { font-size: 16px; }
+.rp-mobile .rp-inline-text, .rp-mobile-popover .rp-inline-text { padding-right: 42px; min-height: 36px; }
+.rp-inline-edit-button { position: absolute; right: 0; top: 0; min-width: 36px; min-height: 36px; padding: 6px; }
+.rp-mobile-popover { padding: 8px 10px; overscroll-behavior: contain; }
+.rp-mobile-popover .rp-popover-tools { flex-wrap: wrap; gap: 4px; margin-bottom: 5px; }
+.rp-mobile-popover .rp-popover-tools .rp-palette { flex: 1 0 100%; justify-content: flex-start; gap: 6px; padding: 0; }
+.rp-mobile-popover .rp-palette button { width: 28px; height: 28px; min-width: 28px; min-height: 28px; padding: 0; border-radius: 50%; }
+.rp-mobile-popover .rp-popover-tools .rp-icon-button { min-width: 32px; width: 32px; min-height: 32px; height: 32px; padding: 4px; }
+.rp-mobile-popover .rp-popover-tools .rp-icon-button svg { width: 22px !important; height: 22px !important; flex-basis: 22px; }
+.rp-mobile-popover .rp-popover-body > .rp-button { align-self: flex-start; }
+.rp-mobile-popover .rp-card-text { font-size: 14px; }
+@media (prefers-reduced-motion: no-preference) { .rp-flash { animation: rp-flash-pulse .6s ease-in-out 3; } }
+@keyframes rp-flash-pulse { 50% { outline-offset: 6px; } }
+/* Quiet reading surfaces and compact, shared drawing controls. */
+.rp-reader, .rp-annotations, .rp-annotation-popover { --rp-line: var(--background-modifier-border); --rp-soft: var(--background-secondary); --rp-accent: var(--interactive-accent, #426ba6); }
+.rp-reader [hidden] { display: none !important; }
+.rp-reader .rp-file-name { height: 30px; min-height: 30px; padding: 5px 12px; font-weight: 500; letter-spacing: .01em; background: var(--background-primary); border-bottom: 1px solid var(--rp-line); }
+.rp-reader .rp-toolbar { flex-wrap: nowrap; gap: 5px; padding: 5px 10px; min-height: 42px; border-bottom: 1px solid var(--rp-line); }
+.rp-reader .rp-toolbar > .rp-icon-button, .rp-reader .rp-desktop-tools .rp-drawing-entry { display: inline-flex; align-items: center; justify-content: center; gap: 6px; }
+.rp-reader:not(.rp-mobile) .rp-toolbar > .rp-icon-button { width: 30px; height: 30px; min-height: 30px; padding: 6px; border: 0; background: transparent; color: var(--text-muted); box-shadow: none; border-radius: 7px; }
+.rp-reader:not(.rp-mobile) .rp-toolbar > .rp-icon-button svg { width: 18px; height: 18px; }
+.rp-reader:not(.rp-mobile) .rp-toolbar .rp-select { margin-right: auto; max-width: 130px; }
+.rp-reader .rp-page-input { border-radius: 7px; box-shadow: none; background: var(--rp-soft); border-color: transparent; }
+.rp-desktop-tools { display: flex; flex: 0 0 auto; flex-wrap: wrap; align-items: center; gap: 8px; padding: 6px 10px; background: var(--background-primary); border-bottom: 1px solid var(--rp-line); }
+.rp-desktop-tools .rp-select, .rp-desktop-tools .rp-button { height: 30px; min-height: 30px; border-radius: 7px; box-shadow: none; }
+.rp-desktop-tools .rp-drawing-entry { padding: 4px 10px; border: 1px solid var(--rp-line); background: var(--rp-soft); font-weight: 500; }
+.rp-desktop-tools .rp-drawing-entry svg { width: 16px; height: 16px; }
+.rp-desktop-tools .rp-palette { padding-inline: 10px; border-left: 1px solid var(--rp-line); border-right: 1px solid var(--rp-line); gap: 6px; }
+.rp-desktop-tools .rp-palette .rp-button { width: 20px; min-width: 20px; height: 20px; min-height: 20px; border-radius: 50%; }
+.rp-desktop-tools .rp-select:last-child { margin-left: auto; }
+.rp-reader .rp-button:focus-visible, .rp-annotations .rp-button:focus-visible, .rp-annotation-popover .rp-button:focus-visible { outline: 2px solid var(--rp-accent); outline-offset: 2px; }
+.rp-reader .rp-button:not(.is-active):hover, .rp-annotations .rp-icon-button:hover { background-color: var(--background-modifier-hover, #7a899218); }
+.rp-reader .rp-button.is-active, .rp-reader .rp-drawing-entry.is-active { background: var(--rp-accent); border-color: transparent; color: var(--text-on-accent, white); }
+.rp-reader .rp-ink-toolbar { position: relative; z-index: 7; display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 6px 10px; background: var(--background-primary); border-bottom: 1px solid var(--rp-line); box-shadow: 0 3px 9px #00000005; }
+.rp-ink-segment { display: inline-flex; flex: 0 0 auto; gap: 2px; padding: 2px; border-radius: 9px; background: var(--rp-soft); }
+.rp-reader .rp-ink-toolbar .rp-icon-button { display: inline-flex; justify-content: center; align-items: center; flex: 0 0 auto; width: 30px; height: 30px; min-width: 30px; min-height: 30px; padding: 6px; border-radius: 7px; border: 0; box-shadow: none; background: transparent; color: var(--text-muted); }
+.rp-reader .rp-ink-toolbar .rp-icon-button.is-active { background: var(--background-primary); color: var(--rp-accent); box-shadow: 0 1px 4px #00000012; }
+.rp-reader .rp-ink-toolbar .rp-icon-button svg { width: 18px; height: 18px; pointer-events: none; }
+.rp-ink-colors { display: inline-flex; flex: 0 0 auto; align-items: center; gap: 5px; }
+.rp-reader .rp-ink-colors .rp-button { display: grid; place-items: center; width: 25px; height: 25px; min-height: 25px; min-width: 25px; padding: 3px; border: 1px solid transparent; border-radius: 50%; box-shadow: none; background: transparent; }
+.rp-ink-colors .rp-button::before { content: ''; display: block; width: 15px; height: 15px; background: var(--rp-ink-color); border-radius: 50%; border: 1px solid #ffffff35; }
+.rp-reader .rp-ink-colors .rp-button.is-active { background: var(--background-primary); border-color: var(--rp-ink-color); outline: 2px solid var(--rp-soft); outline-offset: 1px; }
+.rp-reader .rp-ink-toolbar > .rp-select { width: 106px; min-width: 0; height: 30px; min-height: 30px; padding: 3px 7px; font-size: 12px; border-radius: 7px; box-shadow: none; }
+.rp-reader .rp-ink-count { margin-left: auto; padding: 0; font-variant-numeric: tabular-nums; color: var(--text-faint, var(--text-muted)); }
+.rp-reader .rp-ink-done { display: inline-flex; align-items: center; justify-content: center; gap: 5px; min-height: 30px; padding: 4px 10px; border: 0; border-radius: 7px; box-shadow: none; background: var(--rp-accent); color: var(--text-on-accent, white); }
+.rp-ink-done svg { width: 15px; height: 15px; }
+.rp-ink-settings { position: relative; flex: 0 0 auto; }
+.rp-ink-settings > summary { list-style: none; cursor: pointer; }
+.rp-ink-settings > summary::-webkit-details-marker { display: none; }
+.rp-ink-options { position: absolute; right: 0; top: calc(100% + 9px); width: 260px; max-width: calc(100vw - 28px); padding: 12px; background: var(--background-primary); border: 1px solid var(--rp-line); border-radius: 12px; box-shadow: 0 8px 28px #0002; }
+.rp-ink-option { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 10px; color: var(--text-normal); font-size: 12px; }
+.rp-reader .rp-ink-options .rp-select { width: 118px; min-width: 0; height: 30px; min-height: 30px; font-size: 12px; border-radius: 6px; }
+.rp-ink-option input[type='checkbox'] { width: 18px; height: 18px; accent-color: var(--rp-accent); }
+.rp-ink-hint { color: var(--text-muted); font-size: 11px; line-height: 1.6; margin: 3px 0 0; }
+.rp-eraser-cursor { position: absolute; z-index: 8; pointer-events: none; border: 1.5px solid #5279ab; border-radius: 50%; transform: translate(-50%, -50%); background: #729ad31a; box-shadow: 0 0 0 1px #fff9; }
+.rp-reader[data-mode='draw'][data-ink-tool='erase'] .rp-surface { cursor: cell; }
+.rp-reader .rp-page { border-radius: 2px; box-shadow: 0 2px 10px #00000016; }
+.rp-reader .rp-page-label { padding: 7px 0 0; font-size: 10px; letter-spacing: .02em; }
+.rp-reader .rp-status { min-height: 23px; padding: 4px 12px; font-size: 11px; }
+.rp-annotations .rp-list-header { gap: 9px; padding: 12px; background: var(--background-primary); }
+.rp-annotations .rp-panel-tabs { gap: 3px; padding: 3px; border-radius: 8px; background: var(--background-secondary); }
+.rp-annotations .rp-panel-tabs .rp-button { min-height: 27px; padding: 3px 9px; border: 0; border-radius: 6px; box-shadow: none; background: transparent; color: var(--text-muted); }
+.rp-annotations .rp-panel-tabs .rp-button.is-active { background: var(--background-primary); color: var(--text-normal); box-shadow: 0 1px 4px #0000000d; }
+.rp-annotations .rp-list-header .rp-select, .rp-annotations .rp-search, .rp-annotations .rp-filters .rp-button { border-radius: 7px; box-shadow: none; }
+.rp-annotations .rp-search { background: var(--background-secondary); border-color: transparent; padding: 7px 9px; }
+.rp-annotations .rp-card { border: 1px solid var(--rp-line); border-left: 3px solid var(--rp-color); border-radius: 10px; padding: 10px 11px; gap: 8px; box-shadow: 0 1px 3px #00000005; }
+.rp-annotations .rp-card-meta { color: var(--text-muted); font-size: 10px; letter-spacing: .01em; }
+.rp-annotations .rp-card-text { padding-left: 9px; border-color: var(--rp-color); }
+.rp-annotations .rp-card-image { border: 1px solid var(--rp-line); border-radius: 6px; }
+.rp-annotation-popover { border-radius: 12px; border-color: var(--background-modifier-border); box-shadow: 0 8px 30px #00000020; }
+.rp-annotation-popover .rp-popover-tools { padding-bottom: 6px; border-bottom: 1px solid var(--background-modifier-border); }
+.rp-reader.rp-mobile .rp-ink-toolbar { display: grid; grid-template-columns: 68px minmax(96px, 1fr) 106px; gap: 4px 6px; padding: 5px 6px; }
+.rp-mobile .rp-ink-count { grid-column: 1 / 2; margin-left: 3px; }
+.rp-mobile .rp-ink-colors { justify-content: center; gap: 3px; }
+.rp-mobile .rp-ink-colors .rp-button { width: 23px; min-width: 23px; height: 25px; min-height: 25px; }
+.rp-reader.rp-mobile .rp-ink-toolbar > .rp-icon-button { grid-column: 2; grid-row: 2; justify-self: end; margin-right: 36px; }
+.rp-mobile .rp-ink-settings { grid-column: 2; grid-row: 2; justify-self: end; }
+.rp-mobile .rp-ink-done { grid-column: 3; grid-row: 2; width: 100%; }
+.rp-reader.rp-mobile .rp-ink-toolbar .rp-icon-button { width: 32px; min-width: 32px; height: 32px; min-height: 32px; padding: 4px; }
+.rp-reader.rp-mobile .rp-ink-toolbar .rp-icon-button svg { width: 24px !important; height: 24px !important; flex-basis: 24px; }
+.rp-reader.rp-mobile .rp-ink-toolbar > .rp-select { width: 106px; height: 32px; min-height: 32px; font-size: 12px; }
+.rp-reader.rp-mobile .rp-ink-options { right: -106px; }
+.rp-annotations.rp-mobile .rp-list-header { padding: 7px 8px; gap: 6px; }
+.rp-annotations.rp-mobile .rp-card { padding: 8px 9px; gap: 6px; }
+@media (max-width: 600px) { .rp-reader:not(.rp-mobile) .rp-desktop-tools { gap: 5px; } .rp-desktop-tools .rp-select:last-child { margin-left: 0; } }
+@media (prefers-reduced-motion: no-preference) { .rp-button { transition: background-color .12s ease, color .12s ease, box-shadow .12s ease; } }
+.rp-reader.rp-mobile .rp-ink-toolbar { padding: 3px 6px; }
+.rp-reader.rp-mobile .rp-toolbar > .rp-icon-button, .rp-mobile-toolbar > .rp-button { border: 0; border-radius: 8px; box-shadow: none; background: transparent; }
+.rp-mobile-toolbar > .rp-button.is-active { background: var(--rp-accent); color: var(--text-on-accent, white); }
+.rp-reader:not(.rp-mobile) .rp-toolbar { flex-wrap: wrap; }
+.rp-reader .rp-select, .rp-annotations .rp-select, .rp-reader input:not([type='checkbox']), .rp-reader .rp-button, .rp-annotations .rp-button, .rp-annotation-popover .rp-button { color: var(--text-normal); border-color: var(--background-modifier-border); background-color: var(--background-primary); }
+.rp-reader .rp-button, .rp-annotations .rp-button, .rp-annotation-popover .rp-button { -webkit-tap-highlight-color: transparent; }
+.rp-reader .rp-button.rp-ink-done { background: var(--rp-accent); color: var(--text-on-accent, white); border-color: transparent; }
+.rp-reader .rp-button.rp-ink-done:hover { background: var(--rp-accent); color: var(--text-on-accent, white); filter: brightness(1.06); }
+.rp-reader .rp-button.is-active { color: var(--text-on-accent, white); background-color: var(--rp-accent); }
+.rp-focus .rp-desktop-tools { display: none; }
+.rp-load-recovery { max-width: 440px; margin: 48px auto; padding: 20px; color: var(--text-normal); background: var(--background-primary); border: 1px solid var(--background-modifier-border); border-radius: 12px; font-size: 14px; line-height: 1.7; }
+.rp-load-recovery .rp-button { margin-top: 8px; }
+.rp-load-recovery { width: calc(100% - 24px); }
+
+/* The diagnostic preview stays bounded inside the normal modal on phones. */
+.rp-diagnostic-preview { position:relative; width:100%; max-width:512px; overflow:hidden; }
+.rp-diagnostic-preview.rp-reader { display:block; height:auto; min-height:0; }
+.rp-diagnostic-preview > img, .rp-diagnostic-preview > canvas { display:block; width:100%; height:auto; }
+.rp-diagnostic-preview > img[hidden] { display:none; }
+.rp-diagnostic-preview .textLayer { position:absolute; inset:0; transform-origin:top left; }
+.rp-diagnostic-path { font-size:var(--font-smallest); color:var(--text-muted); overflow-wrap:anywhere; }
+
+/* Reuse the reader in Obsidian's own Ctrl-hover lifetime, without a new tab. */
+.hover-popover .rp-pdf-hover { width:100%; min-width:280px; height:min(640px,72vh); }
+.rp-pdf-hover > .rp-reader { height:100%; }
+.rp-pdf-hover .rp-toolbar { gap:3px; padding:5px; }
+.rp-pdf-hover .rp-desktop-tools { flex-wrap:wrap; padding:5px; }
+.rp-pdf-hover .rp-status { font-size:11px; }
+.rp-diagnostic-viewer { width:100%; height:min(70vh,720px); min-height:320px; margin-top:12px; border:1px solid var(--background-modifier-border); }
+.rp-diagnostic-viewer[hidden] { display:none; }
+.rp-diagnostic-viewer > .rp-reader { height:100%; }
+.modal.rp-mobile.rp-diagnostic-modal { width:min(960px,calc(100vw - 16px)); max-width:calc(100vw - 16px); }
+.rp-pdf-inline { width:100%; min-width:0; height:min(640px,70vh); min-height:320px; }
+.rp-pdf-inline > .rp-reader { height:100%; }
+
+/* Native PDF view: do not impose our renderer's page/text/canvas geometry. */
+.rp-native-holder { height:100%; min-height:0; display:flex; flex-direction:column; }
+.rp-native-holder > .rp-native-reader { flex:1 1 0; }
+.rp-native-reader > .pdf-container, .rp-native-reader > .view-content, .rp-native-reader > .rp-native-root { flex:1 1 0; min-height:80px; height:auto; position:relative; }
+.rp-native-reader .rp-native-extra { min-height:0; padding:2px 8px; justify-content:flex-end; }
+.rp-native-reader .pdfViewer > .page { clip-path:inset(var(--rp-native-crop,0%)); }
+.rp-native-reader .rp-marks { z-index:8; }
+.rp-native-reader .rp-ink-preview { z-index:9; }
+.rp-native-reader .rp-selection-box, .rp-native-reader .rp-text-selection-preview { z-index:10; }
+.rp-native-reader[data-mode='draw'] .pdf-viewer-container,
+.rp-native-reader[data-mode='gesture'] .pdf-viewer-container,
+.rp-native-reader[data-mode='highlight'] .pdf-viewer-container,
+.rp-native-reader[data-mode='capture'] .pdf-viewer-container { touch-action:none; overscroll-behavior:contain; }
+.rp-native-reader[data-mode='capture'] .page, .rp-native-reader[data-mode='draw'] .page { cursor:crosshair; }
+/* One row in normal reading; keep core controls available from More. */
+.rp-native-reader { position:relative; container-type:inline-size; container-name:rp-tools; }
+.rp-native-reader:not(.rp-native-show-toolbar) .pdf-toolbar { display:none !important; }
+.rp-native-reader .rp-file-name { display:none !important; }
+.rp-native-reader .rp-status { position:absolute; width:1px; height:1px; min-height:0; padding:0; overflow:hidden; clip-path:inset(50%); white-space:nowrap; }
+.rp-native-reader .rp-native-extra.rp-native-navigation.rp-compact-bar { position:static; flex:0 0 auto; display:flex; flex-wrap:nowrap; align-items:center; justify-content:flex-start; min-width:0; width:100%; min-height:36px; height:36px; gap:4px; padding:2px 6px; background:var(--background-primary); border:0; border-bottom:1px solid var(--background-modifier-border); overflow:hidden; }
+.rp-native-reader .rp-compact-bar .rp-page-count { flex:0 0 auto; margin:0; font-size:12px; }
+.rp-native-reader .rp-compact-bar .rp-page-input { flex:0 0 42px; width:42px !important; min-width:0; }
+.rp-native-reader .rp-compact-bar > .rp-select { flex:0 0 78px; width:78px; margin:0; }
+.rp-native-reader .rp-compact-bar > .rp-mobile-toolbar,
+.rp-native-reader .rp-compact-bar > .rp-desktop-tools { display:flex; flex:1 1 auto; min-width:0; flex-wrap:nowrap; align-items:center; justify-content:flex-end; gap:4px; padding:0; border:0; overflow:hidden; }
+.rp-native-reader .rp-compact-bar .rp-desktop-tools .rp-palette { gap:3px; padding:0 5px; }
+.rp-native-reader .rp-compact-bar .rp-desktop-tools > .rp-select { min-width:0; max-width:130px; }
+.rp-native-reader .rp-compact-bar .rp-desktop-tools > .rp-select:last-child { margin-left:0; }
+.rp-native-reader.rp-mobile .rp-compact-bar .rp-mobile-toolbar { gap:1px; justify-content:flex-end; }
+.rp-native-reader.rp-mobile .rp-compact-bar .rp-mobile-toolbar > .rp-button { width:32px; min-width:32px; height:32px; min-height:32px; padding:4px; }
+.rp-native-reader.rp-focus .rp-native-navigation { display:flex; }
+.rp-native-reader.rp-focus .rp-compact-bar > .rp-mobile-toolbar,
+.rp-native-reader.rp-focus .rp-compact-bar > .rp-desktop-tools { visibility:hidden; }
+.rp-reader .rp-toolbar > .rp-capture-entry { flex: 0 0 auto; white-space: nowrap; }
+.rp-reader:not(.rp-mobile) .rp-toolbar > .rp-capture-entry { width: auto; padding-inline: 8px; }
+.rp-reader .rp-toolbar > .rp-capture-entry[aria-pressed="true"] { background: var(--rp-accent); color: var(--text-on-accent, white); }
+.rp-reader.rp-mobile .rp-capture-label, .rp-native-reader.rp-focus .rp-compact-bar > .rp-capture-entry { display: none; }
+@container rp-tools (max-width: 950px) {
+  .rp-compact-bar .rp-desktop-tools .rp-palette,
+  .rp-compact-bar .rp-desktop-tools > .rp-button:not(.rp-drawing-entry) { display:none; }
+}
+@container rp-tools (max-width: 760px) {
+  .rp-reader .rp-capture-label { display: none; }
+  .rp-reader:not(.rp-mobile) .rp-toolbar > .rp-capture-entry { width: 30px; padding-inline: 6px; }
+  .rp-compact-bar .rp-desktop-tools > :is([aria-label="노트로 가져올 형식"],[aria-label="Format for inserting into a note"]) { display:none; }
+}
+@container rp-tools (max-width: 600px) {
+  .rp-compact-bar > :is([aria-label="PDF 확대"],[aria-label="PDF zoom"]) { display:none; }
+}
+@container rp-tools (max-width: 520px) {
+  .rp-compact-bar .rp-mobile-toolbar > :is(:is([aria-label="읽기"],[aria-label="Read"]),:is([aria-label="메모지 붙이기"],[aria-label="Place a note"]),:is([aria-label="목차"],[aria-label="Outline"])) { display:none; }
+  .rp-compact-bar .rp-desktop-tools > .rp-drawing-entry { display:none; }
+}
+@container rp-tools (max-width: 420px) {
+  .rp-compact-bar > .rp-desktop-tools { display:none !important; }
+}
+
+/* Offline feature guide inside the settings tab. */
+.rp-feature-guide { margin-top:24px; padding-top:16px; border-top:1px solid var(--background-modifier-border); line-height:1.65; overflow-wrap:anywhere; }
+.rp-feature-guide [hidden] { display:none !important; }
+.rp-guide-intro, .rp-guide-count { color:var(--text-muted); font-size:var(--font-ui-small,13px); }
+.rp-guide-controls { display:flex; flex-wrap:wrap; align-items:center; gap:8px; margin:12px 0 4px; }
+.rp-guide-controls .rp-guide-search { flex:1 1 220px; min-width:120px; width:100%; height:36px; font-size:16px; }
+.rp-guide-controls button { height:36px; min-height:36px; padding:5px 10px; font-size:14px; white-space:nowrap; }
+.rp-guide-section { margin:8px 0; padding:0 12px; border:1px solid var(--background-modifier-border); border-radius:8px; }
+.rp-guide-section > summary { padding:10px 0; cursor:pointer; font-weight:600; min-height:42px; }
+.rp-guide-entry { margin:10px 0 14px; }
+.rp-guide-entry h4 { margin:0 0 4px; font-size:var(--font-ui-small,14px); }
+.rp-guide-entry p { margin:0; font-size:var(--font-ui-small,14px); line-height:1.75; }
+.rp-mobile .rp-guide-section { padding:0 10px; }
+.rp-mobile .rp-guide-entry p { font-size:14px; }
+
+/* Keep the legacy overlay interactive in reading mode, but out of the way
+   of the enhanced reader's selection, pen and capture tools. */
+.rp-native-reader:not([data-mode="read"]) .notenyang-pdf-highlight-layer,
+.rp-native-reader:not([data-mode="read"]) .notenyang-pdf-highlight {
+  pointer-events: none;
+}
+.rp-legacy-comment {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  padding: 4px 8px;
+}
+
+
+/* Shared Markdown and PDF annotation sidebar. */
+.notenyang-unified .rp-card.is-active {
+  outline: 1px solid var(--interactive-accent);
+  outline-offset: -1px;
+}
+
+.notenyang-unified .rp-inline-comment {
+  padding: 7px 8px;
+  border-radius: 5px;
+  background: var(--background-secondary);
+}
+
+.notenyang-unified .rp-inline-comment-preview {
+  min-height: 1.5em;
+  color: var(--text-normal);
+  font-size: var(--font-ui-small, 13px);
+  cursor: text;
+}
+
+.notenyang-unified .rp-unified-comment > :first-child {
+  margin-top: 0;
+}
+
+.notenyang-unified .rp-unified-comment > :last-child {
+  margin-bottom: 0;
+}
+
+.notenyang-unified .rp-card-date {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+/* Apply the 0.1.2 draft layout to the shared sidebar's composer. */
+.notenyang-unified .rp-unified-draft {
+  flex: 0 1 auto;
+  min-inline-size: 0;
+  max-height: 68%;
+  padding: var(--size-4-2);
+  overflow-y: auto;
+}
+
+.notenyang-unified .rp-unified-draft .notenyang-draft {
+  margin: 0;
+}
+
+.notenyang-unified .rp-unified-draft .notenyang-card-quote {
+  max-block-size: min(10em, 24vh);
+  overflow-y: auto;
+}
+
+.notenyang-unified .rp-unified-draft .notenyang-capture {
+  max-height: 140px;
+  object-fit: contain;
+}
+
+.rp-annotations.notenyang-unified {
+  min-width: 0;
+}
+
+.notenyang-unified .rp-list-header,
+.notenyang-unified.rp-mobile .rp-list-header {
+  flex: 0 0 auto;
+  gap: 6px;
+  max-height: none;
+  padding: 6px 8px;
+  overflow: visible;
+}
+
+.notenyang-unified .rp-list-top,
+.notenyang-unified .rp-sidebar-tools {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+}
+
+.notenyang-unified .rp-list-top .rp-panel-tabs {
+  flex: 1 1 auto;
+  min-width: 0;
+  gap: 2px;
+}
+
+.notenyang-unified .rp-panel-tabs .rp-button {
+  flex: 0 1 auto;
+  min-width: 0;
+  min-height: 27px;
+  height: 27px;
+  padding: 0 7px;
+  border: 0;
+  border-radius: var(--radius-s);
+  background: transparent;
+  box-shadow: none;
+  color: var(--text-muted);
+  font-size: var(--font-ui-small);
+  text-overflow: ellipsis;
+  overflow: hidden;
+}
+
+.notenyang-unified .rp-panel-tabs .rp-button.is-active {
+  background: var(--background-modifier-hover);
+  color: var(--text-normal);
+}
+
+.notenyang-unified .rp-list-header .rp-sidebar-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 27px;
+  width: 27px;
+  height: 27px;
+  min-height: 27px;
+  padding: 4px;
+  border: 0;
+  border-radius: var(--radius-s);
+  background: transparent;
+  box-shadow: none;
+  color: var(--text-muted);
+}
+
+.notenyang-unified .rp-list-header .rp-sidebar-action[aria-pressed="true"] {
+  color: var(--text-accent);
+}
+
+.notenyang-unified .rp-list-header .rp-sidebar-action:hover,
+.notenyang-unified .rp-list-header .rp-scope-button:hover {
+  background: var(--background-modifier-hover);
+  color: var(--text-normal);
+}
+
+.notenyang-unified .rp-list-header .rp-scope-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  max-width: 46%;
+  min-width: 0;
+  min-height: 27px;
+  height: 27px;
+  padding: 0 4px 0 7px;
+  border: 0;
+  border-radius: var(--radius-s);
+  background: transparent;
+  box-shadow: none;
+  color: var(--text-muted);
+  font-size: var(--font-ui-smaller);
+}
+
+.notenyang-unified .rp-scope-label {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.notenyang-unified .rp-scope-chevron {
+  display: inline-flex;
+  flex: 0 0 auto;
+}
+
+.notenyang-unified .rp-scope-chevron svg {
+  width: 14px;
+  height: 14px;
+}
+
+.notenyang-unified .rp-sidebar-tools > .rp-search {
+  flex: 1 1 0;
+  min-width: 0;
+  height: 28px;
+  min-height: 28px;
+  margin: 0;
+  font-size: var(--font-ui-small);
+}
+
+.notenyang-unified.rp-mobile .rp-sidebar-tools > .rp-search {
+  font-size: 16px;
+}
+
+.notenyang-unified .rp-list-count {
+  padding-inline: 2px;
+  font-size: var(--font-ui-smaller);
+  line-height: 1.2;
+  color: var(--text-muted);
+}
+
+.notenyang-unified .rp-list-scroller {
+  padding-inline: 8px;
+}
+
+.notenyang-unified .rp-list-spacer {
+  margin-top: 6px;
+}
+
+.notenyang-unified .rp-card {
+  padding: 7px 8px;
+  gap: 5px;
+  border-inline-start-width: 2px;
+  border-radius: var(--radius-m);
+}
+
+/* PDF.js expands the end-of-text sentinel across the page during selection.
+   The sentinel and structural nodes should never paint a selection rectangle. */
+.rp-native-reader .textLayer::selection,
+.rp-native-reader .textLayer :is(.endOfContent, .markedContent, div, br)::selection {
+  background-color: transparent !important;
+}
+
+.rp-native-reader:not(.rp-precise-selection) .textLayer span:not(.markedContent):not([role="img"])::selection {
+  background-color: var(--color-accent);
+}
+
+
+/* Native PDF text remains selected, while only the text runs are painted. */
+.rp-native-reader.rp-native-text-paint .textLayer::selection,
+.rp-native-reader.rp-native-text-paint .textLayer ::selection {
+  background: transparent !important;
+  color: transparent !important;
+}
+
+.rp-native-reader .textLayer ::highlight(notenyang-pdf-selection) {
+  color: transparent;
+  background-color: var(--color-accent);
+}
+
+.rp-native-reader .rp-compact-bar > .rp-pdf-zoom {
+  flex: 0 0 112px;
+  width: 112px;
+  max-width: none;
+  padding-inline: 8px 23px;
+}
+
+.notenyang-unified .rp-list-top .rp-panel-tabs {
+  background: transparent;
+  padding: 0;
+}
+
+.notenyang-unified .rp-panel-tabs .rp-button.is-active {
+  box-shadow: none;
+}
+
+.notenyang-md-toolbar-host {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden !important;
+}
+
+.notenyang-md-toolbar-host > :is(.markdown-source-view, .markdown-reading-view) {
+  flex: 1 1 0;
+  height: auto;
+  min-height: 0;
+}
+
+.notenyang-md-toolbar {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+  min-height: 36px;
+  padding: 2px 6px;
+  border-bottom: 1px solid var(--background-modifier-border);
+  background: var(--background-primary);
+}
+
+.notenyang-md-toolbar .notenyang-md-icon {
+  flex: 0 0 auto;
+  width: 28px;
+  height: 28px;
+  padding: 5px;
+}
+
+.notenyang-md-toolbar button:disabled {
+  opacity: 0.45;
+}
+
+/* Markdown shares the PDF palette's trailing toolbar position and swatches. */
+.notenyang-md-toolbar .notenyang-md-palette {
+  flex: 0 0 auto;
+  margin-inline-start: auto;
+  padding-inline: 7px;
+}
+
+
+/* Managed PDF drags keep the native Selection empty until the user copies. */
+.rp-native-reader.rp-precise-selection .textLayer::selection,
+.rp-native-reader.rp-precise-selection .textLayer ::selection {
+  background: transparent !important;
+  color: transparent !important;
+}
+
+
+
+/* Shared placement and separators for both document toolbars. */
+.notenyang-md-toolbar .notenyang-toolbar-palette,
+.rp-native-reader .rp-compact-bar > .notenyang-toolbar-palette {
+  box-sizing: border-box;
+  align-items: center;
+  flex: 0 0 auto;
+  gap: 3px;
+  padding-inline: 5px;
+  border-inline: 1px solid var(--background-modifier-border);
+}
+
+.notenyang-md-toolbar .notenyang-toolbar-palette > button,
+.rp-native-reader .rp-compact-bar > .notenyang-toolbar-palette > button {
+  width: 20px;
+  min-width: 20px;
+  height: 20px;
+  min-height: 20px;
+}
+
+@container rp-tools (max-width: 560px) {
+  .rp-native-reader .rp-compact-bar > .notenyang-toolbar-palette {
+    display: none;
+  }
+}
+
+.rp-reader .rp-palette.notenyang-toolbar-palette > button,
+.rp-palette.notenyang-toolbar-palette > button {
+  background: var(--notenyang-swatch-color);
+  border-color: var(--background-modifier-border);
+}
+
+.rp-reader .rp-palette.notenyang-toolbar-palette > button.is-active,
+.rp-palette.notenyang-toolbar-palette > button.is-active {
+  border-color: var(--notenyang-swatch-color);
+  outline: none;
+  box-shadow: inset 0 0 0 2px var(--background-primary);
 }
