@@ -153,10 +153,10 @@ var UI_TEXT = {
   delete: ["Delete", "삭제"],
   deleteTitle: ["Delete note?", "노트를 삭제할까요?"],
   deleteMessage: ["The note will be moved to NoteNyang’s hidden trash folder.", "노트를 NoteNyang의 숨김 휴지통으로 이동합니다."],
-  deleteWithCapture: ["The note and its capture image will be moved to NoteNyang’s hidden trash folder. Image links in other notes may stop working.", "노트와 캡처 이미지를 NoteNyang의 숨김 휴지통으로 이동합니다. 다른 노트에 삽입한 이미지 링크가 끊길 수 있습니다."],
+  deleteWithCapture: ["The note and its linked image will be moved to NoteNyang’s hidden trash folder. Image links in other notes may stop working.", "노트와 연결된 이미지를 NoteNyang의 숨김 휴지통으로 이동합니다. 다른 노트에 삽입한 이미지 링크가 끊길 수 있습니다."],
   deleted: ["Note deleted.", "노트를 삭제했습니다."],
   deleteFailed: ["Could not delete the note.", "노트를 삭제하지 못했습니다."],
-  deleteCaptureFailed: ["Could not move the capture. The note was kept.", "캡처를 옮기지 못해 노트를 보관했습니다."],
+  deleteCaptureFailed: ["Could not move the image. The note was kept.", "이미지를 옮기지 못해 노트를 보관했습니다."],
   deleteRestoreFailed: ["Could not move the capture. The note is in {path}.", "캡처를 옮기지 못했습니다. 노트는 {path}에 있습니다."],
   openAnnotation: ["Open note: {body}", "노트 열기 · {body}"],
   openAnnotationIn: ["Open note in {path}", "{path}의 노트 열기"],
@@ -1122,7 +1122,9 @@ function processReadingView(element, context, plugin) {
 
 // src/settings.ts
 var import_obsidian3 = require("obsidian");
-var CAPTURE_FOLDER = "NoteNyang 캡처";
+const PDF_IMAGE_FOLDER = "NoteNyang 이미지";
+const LEGACY_CAPTURE_FOLDER = "NoteNyang 캡처";
+const PDF_IMAGE_SUBFOLDERS = Object.freeze({ capture: "캡처", drawing: "그리기" });
 var DEFAULT_SETTINGS = {
   language: "auto",
   showHighlights: true,
@@ -1519,11 +1521,12 @@ var AnnotationStore = class {
     return shared ? null : anchor.imagePath;
   }
 
-  async saveCapture(sourcePath, page, bytes) {
+  async savePdfImage(kind, sourcePath, page, bytes) {
+    const folder = PDF_IMAGE_FOLDER + "/" + PDF_IMAGE_SUBFOLDERS[kind];
     return this.queueCaptureChange(async () => {
       const { adapter } = this.app.vault;
-      await this.ensureDirectoryPath(CAPTURE_FOLDER);
-      const path = await availableCapturePath(CAPTURE_FOLDER, sourcePath, page, async candidate =>
+      await this.ensureDirectoryPath(folder);
+      const path = await availableCapturePath(folder, sourcePath, page, async candidate =>
         await adapter.exists(candidate) || await adapter.exists(captureTrashPath(candidate))
       );
       await this.app.vault.createBinary(path, bytes);
@@ -1535,7 +1538,7 @@ var AnnotationStore = class {
     const { adapter } = this.app.vault;
     const target = captureTrashPath(path);
     if (!target || (await adapter.stat(path))?.type !== "file") return null;
-    await this.ensureDirectoryPath(CAPTURE_TRASH_DIRECTORY);
+    await this.ensureDirectoryPath(target.slice(0, target.lastIndexOf("/")));
     if (await adapter.exists(target)) throw new CaptureTrashError(new Error("An archived capture already uses this filename."));
     try { await adapter.rename(path, target); }
     catch (error) { throw new CaptureTrashError(error); }
@@ -1564,7 +1567,7 @@ var AnnotationStore = class {
         for (const image of new Set(paths)) {
           const archived = captureTrashPath(image);
           if (!archived || await adapter.exists(image) || !(await adapter.exists(archived))) continue;
-          await this.ensureDirectoryPath(CAPTURE_FOLDER);
+          await this.ensureDirectoryPath(image.slice(0, image.lastIndexOf("/")));
           await adapter.rename(archived, image);
           restored.push({ image, archived });
         }
@@ -1751,13 +1754,18 @@ ${annotation.body.trim()}`);
 }
 
 // src/domain/capture-filename.ts
-const CAPTURE_TRASH_DIRECTORY = DEFAULT_TRASH_DIRECTORY + "/captures";
+const LEGACY_CAPTURE_TRASH_DIRECTORY = DEFAULT_TRASH_DIRECTORY + "/captures";
+const PDF_IMAGE_TRASH_DIRECTORY = DEFAULT_TRASH_DIRECTORY + "/images";
 
 function captureTrashPath(imagePath) {
   if (typeof imagePath !== "string") return null;
-  const [folder, filename, extra] = imagePath.split("/");
-  if (folder !== CAPTURE_FOLDER || extra !== undefined || !/^[^\\:\x00-\x1f]+\.png$/i.test(filename || "")) return null;
-  return CAPTURE_TRASH_DIRECTORY + "/" + filename;
+  const [root, ...relative] = imagePath.split("/");
+  if (root !== PDF_IMAGE_FOLDER && root !== LEGACY_CAPTURE_FOLDER) return null;
+  const filename = relative.pop();
+  if (!/^[^\\:\x00-\x1f]+\.png$/i.test(filename || "")) return null;
+  if (relative.length && (relative.length > 1 || !Object.values(PDF_IMAGE_SUBFOLDERS).includes(relative[0]))) return null;
+  const trash = root === PDF_IMAGE_FOLDER ? PDF_IMAGE_TRASH_DIRECTORY : LEGACY_CAPTURE_TRASH_DIRECTORY;
+  return [trash, ...relative, filename].join("/");
 }
 
 function captureBaseName(sourcePath, page) {
@@ -1987,7 +1995,7 @@ var NoteNyangSidebarView = class extends import_obsidian6.ItemView {
           const encoded = draft.imageDataUrl.split(",")[1];
           if (!encoded) throw new Error("Invalid captured image.");
           const bytes = Uint8Array.from(atob(encoded), char => char.charCodeAt(0));
-          draft.input.anchor.imagePath = await this.plugin.store.saveCapture(draft.input.sourcePath, draft.input.anchor.page, bytes.buffer);
+          draft.input.anchor.imagePath = await this.plugin.store.savePdfImage("capture", draft.input.sourcePath, draft.input.anchor.page, bytes.buffer);
         } catch (error) {
           console.error("Could not save the NoteNyang PDF capture", error);
           new import_obsidian6.Notice(this.plugin.t("captureSaveFailed"));
@@ -2780,7 +2788,7 @@ var NoteNyangPlugin = class extends import_obsidian7.Plugin {
   updateSettings(changes) {
     const update = this.settingsQueue.then(async () => {
       const previous = this.settings;
-      const next = { ...previous, ...changes };
+      const next = { ...previous, ...(typeof changes === 'function' ? changes(previous) : changes) };
       await this.saveData(next);
       this.settings = next;
       if (uiLanguage(next) !== uiLanguage(previous)) {
@@ -3808,8 +3816,8 @@ function createNoteNyangPdfTools(owner) {
           }
           const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png')); if (!blob) throw new Error(LT("드로잉 이미지를 만들지 못했습니다.", "Could not create a drawing image."));
           const a = original ? { ...C.clone(original), anchors: [{ page: group.page, rects: [raw] }] } : reader.annotation('drawing', [{ page: group.page, rects: [raw] }]); a.ink = C.clone(group.strokes);
-          const folder = `${CAPTURE_FOLDER}`; await reader.plugin.store.ensure(folder); a.image = `${folder}/${a.id}${original ? '-edit-' + C.uid() : ''}.png`;
-          await reader.app.vault.createBinary(a.image, await blob.arrayBuffer()); return a;
+          a.image = await owner.store.savePdfImage('drawing', reader.file.path, group.page, await blob.arrayBuffer());
+          return a;
         } finally { canvas.width = canvas.height = 0; }
       }
       async finish() {
@@ -4016,6 +4024,58 @@ function createNoteNyangPdfTools(owner) {
     node.value = value;
     node.addEventListener('change', () => Promise.resolve(callback(node.value)).catch(report));
     return node;
+  }
+  function toolbarPicker(parent, { cls, label, prefix = '', choices, value, onChange }) {
+    let openMenu;
+    const control = button(parent, '', () => {
+      if (openMenu) { openMenu.hide(); return; }
+      const menu = new Menu().setUseNativeMenu(false);
+      for (const [key, title, icon] of choices) {
+        menu.addItem(item => item.setTitle(title).setIcon(icon).setChecked(key === value()).onClick(() => {
+          Promise.resolve().then(() => onChange(key)).catch(report);
+        }));
+      }
+      openMenu = menu;
+      control.setAttribute('aria-expanded', 'true');
+      menu.onHide(() => {
+        openMenu = null;
+        control.setAttribute('aria-expanded', 'false');
+      });
+      const { left, bottom, width } = control.getBoundingClientRect();
+      menu.showAtPosition({ x: left, y: bottom, width }, control.ownerDocument);
+    }, 'rp-toolbar-picker ' + cls);
+    control.setAttribute('aria-haspopup', 'menu');
+    control.setAttribute('aria-expanded', 'false');
+    const glyph = el(control, 'span', 'rp-picker-glyph');
+    glyph.setAttribute('aria-hidden', 'true');
+    const caption = el(control, 'span', 'rp-picker-caption');
+    const indicator = el(control, 'span', 'rp-picker-chevron');
+    indicator.setAttribute('aria-hidden', 'true');
+    setIcon(indicator, 'chevron-down');
+    const refresh = () => {
+      const [, title, icon] = choices.find(([key]) => key === value()) || choices[0];
+      glyph.replaceChildren();
+      setIcon(glyph, icon);
+      caption.textContent = prefix + title;
+      control.title = label + ' · ' + title;
+      control.setAttribute('aria-label', control.title);
+    };
+    refresh();
+    return { refresh };
+  }
+  function pdfModeChoices() {
+    return [
+      ['read', LT('읽기', 'Read'), 'book-open'],
+      ['gesture', LT('제스처 선택', 'Touch selection'), 'mouse-pointer-2'],
+      ['highlight', LT('형광펜', 'Highlight'), 'highlighter'],
+      ['note', LT('메모지', 'Sticky note'), 'message-square-plus'],
+      ['capture', LT('영역 캡처', 'Area capture'), 'scan'],
+      ['draw', LT('드로잉', 'Drawing'), 'pencil']
+    ];
+  }
+  function pdfFormatChoices() {
+    const icons = { callout: 'message-square-quote', quote: 'quote', text: 'align-left', link: 'link', table: 'table' };
+    return Object.entries(C.EXPORT_FORMATS).map(([key, title]) => [key, title, icons[key]]);
   }
   function debounce(fn, delay) { let timer; const wrapped = (...args) => { clearTimeout(timer); timer = setTimeout(() => fn(...args), delay); }; wrapped.cancel = () => clearTimeout(timer); return wrapped; }
 
@@ -4568,8 +4628,19 @@ function createNoteNyangPdfTools(owner) {
       if (!this.running) throw new Error(LT("PDF 도구가 닫혔습니다.", "PDF tools have been closed."));
     }
 
-    saveData(settings) {
-      return owner.updateSettings({ pdfTools: { ...settings, dataFolder: PDF_DATA_FOLDER } });
+    async saveData(update) {
+      await owner.updateSettings(previous => {
+        const settings = { ...this.settings, ...previous.pdfTools };
+        const changes = typeof update === 'function' ? update(settings) : update;
+        return { pdfTools: { ...settings, ...changes, dataFolder: PDF_DATA_FOLDER } };
+      });
+      Object.assign(this.settings, owner.settings.pdfTools);
+      for (const reader of this.readers()) reader.copyFormatPicker?.refresh();
+    }
+
+    setCopyFormat(format) {
+      if (!Object.hasOwn(C.EXPORT_FORMATS, format)) return Promise.resolve();
+      return this.saveData({ copyFormat: format });
     }
 
     readers() {
@@ -4690,7 +4761,7 @@ function createNoteNyangPdfTools(owner) {
         if (!doc) throw new Error("Capture PDF is no longer open.");
         if (!selection.image) {
           const bytes = await (await fetch(imageDataUrl)).arrayBuffer();
-          selection.image = await owner.store.saveCapture(doc.path, annotation.anchors[0].page, bytes);
+          selection.image = await owner.store.savePdfImage("capture", doc.path, annotation.anchors[0].page, bytes);
         }
         annotation.image = selection.image;
       }
@@ -4715,15 +4786,7 @@ function createNoteNyangPdfTools(owner) {
 
     settingsUI(containerEl) {
       const { t } = owner;
-      const configure = async (key, value) => {
-        const previous = this.settings[key];
-        this.settings[key] = value;
-        try { await this.saveData(this.settings); }
-        catch (error) {
-          if (this.settings[key] === value) this.settings[key] = previous;
-          report(error);
-        }
-      };
+      const configure = (key, value) => this.saveData({ [key]: value }).catch(report);
       new Setting(containerEl).setName(t("pdfToolsHeading")).setHeading();
       el(containerEl, "p", "setting-item-description", t("pdfToolsHelp"));
       new Setting(containerEl).setName(t("pdfToolsColor")).addDropdown(control => {
@@ -5886,8 +5949,6 @@ function createNoteNyangPdfTools(owner) {
       this.pageCount = el(this.toolbar, 'span', 'rp-page-count', '/ —');
       const nextButton = button(this.toolbar, '›', () => this.goToPage(this.pageNumber + 1)); nextButton.setAttribute('aria-label', LT("다음 페이지", "Next page"));
       this.zoomSelect = select(this.toolbar, [['fit', LT("너비 맞춤", "Fit width")], ['1', '100%'], ['1.25', '125%'], ['1.5', '150%'], ['2', '200%']], this.zoom, value => { this.zoom = value; this.reflow(); });
-      this.modeSelect = select(this.toolbar, [['read', LT("읽기", "Read")], ['gesture', LT("제스처 선택", "Touch selection")], ['highlight', LT("형광펜", "Highlight")], ['note', LT("메모지", "Sticky note")], ['capture', LT("영역 캡처", "Area capture")], ['draw', LT("드로잉", "Drawing")]], this.mode, value => this.setMode(value));
-      this.modeSelect.setAttribute('aria-label', LT("노트 도구", "Note tools"));
       const palette = el(this.toolbar, 'div', 'rp-palette notenyang-toolbar-palette'); this.palette = palette; this.paletteButtons = new Map();
       for (const [id, color] of Object.entries(C.COLORS)) {
         const node = button(palette, '', () => this.setColor(id)); this.paletteButtons.set(id, node);
@@ -5896,7 +5957,6 @@ function createNoteNyangPdfTools(owner) {
       }
       const listButton = button(this.toolbar, LT("노트 목록", "Note list"), () => this.plugin.toggleList());
       const outlineButton = button(this.toolbar, LT("목차", "Outline"), () => this.plugin.showSidebar('outline'));
-      this.copyFormatSelect = select(this.toolbar, Object.entries(C.EXPORT_FORMATS).map(([id, name]) => [id, `${LT("노트로: ", "Note format: ")}${name}`]), this.plugin.settings.copyFormat, value => this.plugin.setCopyFormat(value)); this.copyFormatSelect.setAttribute('aria-label', LT("노트로 가져올 형식", "Format for inserting into a note"));
       const searchButton = button(this.toolbar, LT("검색", "Search"), () => { if (this.pdf) this.nativeBinding?.application.findBar?.open?.(); });
       const captureLabel = LT("영역 캡처", "Area capture");
       this.captureButton = iconButton(this.toolbar, 'scan', captureLabel, async () => {
@@ -5909,13 +5969,21 @@ function createNoteNyangPdfTools(owner) {
       for (const [node, icon, label] of [[openButton, 'folder-open', LT("PDF 열기", "Open PDF")], [previousButton, 'chevron-left', LT("이전 페이지", "Previous page")], [nextButton, 'chevron-right', LT("다음 페이지", "Next page")], [searchButton, 'search', LT("검색", "Search")], [listButton, 'list', LT("노트 목록", "Note list")], [outlineButton, 'list-tree', LT("목차", "Outline")], [moreButton, 'ellipsis', LT("더보기", "More")]]) { node.replaceChildren(); node.classList.add('rp-icon-button'); node.title = label; node.setAttribute('aria-label', label); setIcon(node, icon); }
       if (!this.plugin.isMobile) {
         const tools = el(this.contentEl, 'div', 'rp-desktop-tools'); tools.setAttribute('aria-label', LT("PDF 편집 도구", "PDF editing tools"));
-        tools.appendChild(this.modeSelect);
+        this.modePicker = toolbarPicker(tools, {
+          cls: 'rp-pdf-mode-picker', label: LT('노트 도구', 'Note tools'), choices: pdfModeChoices(),
+          value: () => this.mode, onChange: mode => this.setMode(mode)
+        });
         this.desktopDrawing = button(tools, '', () => this.setMode(this.mode === 'draw' ? 'read' : 'draw'), 'rp-drawing-entry'); setIcon(this.desktopDrawing, 'pencil'); el(this.desktopDrawing, 'span', '', LT("드로잉", "Drawing")); this.desktopDrawing.setAttribute('aria-pressed', 'false');
-        tools.appendChild(palette); tools.appendChild(this.copyFormatSelect);
+        tools.appendChild(palette);
+        this.copyFormatPicker = toolbarPicker(tools, {
+          cls: 'rp-pdf-format-picker', label: LT('노트로 가져올 형식', 'Format for inserting into a note'),
+          prefix: LT('노트로: ', 'Note format: '), choices: pdfFormatChoices(),
+          value: () => this.plugin.settings.copyFormat, onChange: format => this.plugin.setCopyFormat(format)
+        });
       }
       if (this.plugin.isMobile) {
         this.mobileActions=new Actions.DoubleTap(this);this.reportActionError=report;
-        for (const node of [openButton, this.modeSelect, palette, listButton, outlineButton, this.copyFormatSelect]) node.hidden = true;
+        for (const node of [openButton, palette, listButton, outlineButton]) node.hidden = true;
         for (const [node, icon, label] of [[previousButton, 'chevron-left', LT("이전 페이지", "Previous page")], [nextButton, 'chevron-right', LT("다음 페이지", "Next page")], [searchButton, 'search', LT("검색", "Search")], [moreButton, 'ellipsis', LT("더보기", "More")]]) { node.replaceChildren(); node.classList.add('rp-icon-button'); node.title = label; node.setAttribute('aria-label', label); setIcon(node, icon); }
         this.pageInput.type = 'text'; this.pageInput.inputMode = 'numeric'; this.pageInput.pattern = '[0-9]*';
         this.mobileToolbar = el(this.contentEl, 'div', 'rp-mobile-toolbar'); this.mobileToolbar.setAttribute('aria-label', LT("PDF 터치 도구", "PDF touch tools")); this.mobileModeButtons = new Map();
@@ -6319,7 +6387,7 @@ function createNoteNyangPdfTools(owner) {
         try { await this.ink?.finish(); } finally { this.inkToolbar.inert = false; }
       }
       this.cancelTextGesture(); this.mode = next;
-      if (this.modeSelect) this.modeSelect.value = this.mode;
+      this.modePicker?.refresh();
       this.contentEl.dataset.mode = this.mode; this.inkToolbar.hidden = this.mode !== 'draw';
       this.captureButton?.setAttribute('aria-pressed', String(this.mode === 'capture'));
       this.desktopDrawing?.classList.toggle('is-active', this.mode === 'draw'); this.desktopDrawing?.setAttribute('aria-pressed', String(this.mode === 'draw')); if (this.inkSettings) this.inkSettings.open = false;
@@ -6404,11 +6472,15 @@ function createNoteNyangPdfTools(owner) {
       if (this.plugin.isMobile || this.isNative) {
         menu.addItem(item => item.setTitle(LT("다른 PDF 열기", "Open another PDF")).setIcon('folder-open').onClick(() => this.plugin.pickPdf()));
         menu.addItem(item => item.setTitle(LT("현재 페이지에 메모 추가", "Add a note to this page")).setIcon('message-square-plus').onClick(() => this.plugin.addPageNote(this.docId).catch(report)));
-        for (const [id, label] of Object.entries(C.EXPORT_FORMATS)) menu.addItem(item => item.setTitle(`${LT("노트 형식: ", "Note format: ")}${label}${this.plugin.settings.copyFormat === id ? ' ✓' : ''}`).onClick(() => this.plugin.setCopyFormat(id).catch(report)));
+        for (const [id, label, icon] of pdfFormatChoices()) menu.addItem(item => item
+          .setTitle(LT('노트 형식: ', 'Note format: ') + label).setIcon(icon)
+          .setChecked(this.plugin.settings.copyFormat === id).onClick(() => this.plugin.setCopyFormat(id).catch(report)));
         menu.addSeparator();
       }
       if(this.isNative){
-        for(const [mode,title]of [['read',LT("읽기", "Read")],['gesture',LT("제스처 선택", "Touch selection")],['highlight',LT("형광펜", "Highlight")],['note',LT("메모지", "Sticky note")],['capture',LT("영역 캡처", "Area capture")],['draw',LT("드로잉", "Drawing")]])menu.addItem(item=>item.setTitle(`${LT("도구: ", "Tool: ")}${title}${this.mode===mode?' ✓':''}`).onClick(()=>this.setMode(mode)));
+        for (const [mode, title, icon] of pdfModeChoices()) menu.addItem(item => item
+          .setTitle(LT('도구: ', 'Tool: ') + title).setIcon(icon).setChecked(this.mode === mode)
+          .onClick(() => this.setMode(mode).catch(report)));
         for(const [color,details]of Object.entries(C.COLORS))menu.addItem(item=>item.setTitle(`${LT("형광펜 색: ", "Highlight color: ")}${details.label}${this.color===color?' ✓':''}`).onClick(()=>this.setColor(color)));
         for(const [value,title]of [['fit',LT("너비 맞춤", "Fit width")],['1','100%'],['1.25','125%'],['1.5','150%'],['2','200%']])menu.addItem(item=>item.setTitle(`${LT("확대: ", "Zoom: ")}${title}`).onClick(()=>{this.zoom=value;this.zoomSelect.value=value;this.reflow();}));
         menu.addItem(item=>item.setTitle(LT("PDF 검색", "Search PDF")).setIcon('search').onClick(()=>{const find=this.nativeBinding.application.findBar;if(typeof find?.open==='function')find.open();else this.contentEl.classList.add('rp-native-show-toolbar');}));
@@ -6625,8 +6697,10 @@ function createNoteNyangPdfTools(owner) {
       }
       async setLayout(single){
         this.mobileActions?.cancelTap();this.cancelTextGesture();this.hideTooltip();this.ink?.endActive();this.ink?.endErase();await this.ink?.flush();
-        const page=this.pageNumber;this.plugin.settings.pdfLayouts={...this.plugin.settings.pdfLayouts,[this.docId]:single?'single':'continuous'};
-        await this.plugin.saveData(this.plugin.settings);
+        const page = this.pageNumber;
+        await this.plugin.saveData(settings => ({
+          pdfLayouts: { ...settings.pdfLayouts, [this.docId]: single ? 'single' : 'continuous' }
+        }));
         for(const reader of this.plugin.readers())if(reader.isNative&&reader.docId===this.docId){const target=reader===this?page:reader.pageNumber;reader.applyLayout();if(reader.canRender())reader.goToPage(target);else reader.pendingNativePage=target;}
         this.status.textContent=single?LT("한 쪽씩 보기", "Single-page view"):LT("이어서 보기", "Continuous view");
       }

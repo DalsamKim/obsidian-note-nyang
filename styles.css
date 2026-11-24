@@ -983,8 +983,6 @@ Source: https://github.com/mozilla/pdf.js
 .rp-native-reader .rp-compact-bar > .rp-mobile-toolbar,
 .rp-native-reader .rp-compact-bar > .rp-desktop-tools { display:flex; flex:1 1 auto; min-width:0; flex-wrap:nowrap; align-items:center; justify-content:flex-end; gap:4px; padding:0; border:0; overflow:hidden; }
 .rp-native-reader .rp-compact-bar .rp-desktop-tools .rp-palette { gap:3px; padding:0 5px; }
-.rp-native-reader .rp-compact-bar .rp-desktop-tools > .rp-select { min-width:0; max-width:130px; }
-.rp-native-reader .rp-compact-bar .rp-desktop-tools > .rp-select:last-child { margin-left:0; }
 .rp-native-reader.rp-mobile .rp-compact-bar .rp-mobile-toolbar { gap:1px; justify-content:flex-end; }
 .rp-native-reader.rp-mobile .rp-compact-bar .rp-mobile-toolbar > .rp-button { width:32px; min-width:32px; height:32px; min-height:32px; padding:4px; }
 .rp-native-reader.rp-focus .rp-native-navigation { display:flex; }
@@ -996,12 +994,11 @@ Source: https://github.com/mozilla/pdf.js
 .rp-reader.rp-mobile .rp-capture-label, .rp-native-reader.rp-focus .rp-compact-bar > .rp-capture-entry { display: none; }
 @container rp-tools (max-width: 950px) {
   .rp-compact-bar .rp-desktop-tools .rp-palette,
-  .rp-compact-bar .rp-desktop-tools > .rp-button:not(.rp-drawing-entry) { display:none; }
+  .rp-compact-bar .rp-desktop-tools > .rp-button:not(.rp-drawing-entry, .rp-toolbar-picker) { display:none; }
 }
 @container rp-tools (max-width: 760px) {
   .rp-reader .rp-capture-label { display: none; }
   .rp-reader:not(.rp-mobile) .rp-toolbar > .rp-capture-entry { width: 30px; padding-inline: 6px; }
-  .rp-compact-bar .rp-desktop-tools > :is([aria-label="노트로 가져올 형식"],[aria-label="Format for inserting into a note"]) { display:none; }
 }
 @container rp-tools (max-width: 600px) {
   .rp-compact-bar > :is([aria-label="PDF 확대"],[aria-label="PDF zoom"]) { display:none; }
@@ -1368,4 +1365,36 @@ Source: https://github.com/mozilla/pdf.js
   border-color: var(--notenyang-swatch-color);
   outline: none;
   box-shadow: inset 0 0 0 2px var(--background-primary);
+}
+
+.rp-reader .rp-desktop-tools .rp-toolbar-picker {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  padding: 4px 7px;
+  border: 1px solid transparent;
+  border-radius: 7px;
+  background: transparent;
+  color: var(--text-muted);
+  box-shadow: none;
+  font-weight: 500;
+}
+
+.rp-reader .rp-desktop-tools .rp-toolbar-picker:is(:hover, [aria-expanded='true']) {
+  border-color: var(--background-modifier-border);
+  background: var(--background-modifier-hover);
+  color: var(--text-normal);
+}
+
+.rp-picker-glyph, .rp-picker-chevron { display: inline-flex; flex: 0 0 auto; }
+.rp-picker-glyph svg { width: 16px; height: 16px; }
+.rp-picker-chevron svg { width: 12px; height: 12px; }
+
+@container rp-tools (max-width: 940px) {
+  .rp-compact-bar .rp-pdf-format-picker .rp-picker-caption { display: none; }
+}
+@container rp-tools (max-width: 760px) {
+  .rp-compact-bar .rp-pdf-mode-picker .rp-picker-caption { display: none; }
 }

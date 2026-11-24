@@ -2,7 +2,7 @@
 
 [한국어 사용설명서](USER-GUIDE.ko.md)
 
-This guide covers creating notes in Markdown and PDFs and managing them in the right sidebar in NoteNyang 0.2.0.
+This guide covers creating notes in Markdown and PDFs and managing them in the right sidebar in NoteNyang 0.2.1.
 
 ## Install and choose a language
 
@@ -33,7 +33,7 @@ Write a comment in the right sidebar and click **Save**. With the comment field 
 2. Drag to select an area within one visible PDF page. Press **Esc** before completing the selection to cancel.
 3. Review the image preview in the sidebar, add a comment if you want, and click **Save**. A capture can be saved with an empty comment.
 
-Area capture is useful for tables and figures, including those in scanned PDFs where text is difficult to select. NoteNyang creates `NoteNyang 캡처/` at the vault root when you save your first capture. PNGs use names such as `Research_12쪽.png`. If that name is already taken, NoteNyang adds a number, as in `Research_12쪽_2.png`.
+Area capture is useful for tables and figures, including those in scanned PDFs where text is difficult to select. NoteNyang stores captures in `NoteNyang 이미지/캡처/` and PDF drawings in `NoteNyang 이미지/그리기/`. Each folder is created when you first save that kind of image. PNGs use names such as `Research_12쪽.png`. If that name is already taken, NoteNyang adds a number, as in `Research_12쪽_2.png`.
 
 ## Advanced PDF tools
 
@@ -44,7 +44,7 @@ The NoteNyang toolbar opens automatically with each PDF. Choose **More → Close
 - **Send notes to a note.** In the PDF note list, filter by color and type, select notes, and choose **Copy / Send to note**. Append the selected notes or filtered results to an existing Markdown note. Exported links jump to the PDF page or the exact note, reusing an open PDF tab when possible.
 - **Outline and reading controls.** Use the embedded PDF outline or create your own nested entries. Under **More → Set printed page number**, enter the number printed on the current page. Citations use that numbering while links still point to the actual PDF page. The More menu also offers single-page and continuous views, margin cropping, and focus reading.
 
-The NoteNyang ribbon, the PDF toolbar’s **Note list**, and notes opened from Markdown all use the same sidebar. In a PDF, **Outline** switches to the outline tab in that sidebar. New PDF tool records and custom outlines are stored in `.notenyang/pdf-reader/`. Captures and drawings are stored in `NoteNyang 캡처/`.
+The NoteNyang ribbon, the PDF toolbar’s **Note list**, and notes opened from Markdown all use the same sidebar. In a PDF, **Outline** switches to the outline tab in that sidebar. New PDF tool records and custom outlines are stored in `.notenyang/pdf-reader/`. Captures and drawings are stored in separate subfolders under `NoteNyang 이미지/`.
 
 The advanced tools use a PDF viewer integration designed for Obsidian 1.8.0 and later. If an open PDF tool still shows the previous language after a language change, reopen it.
 
@@ -61,7 +61,7 @@ Click a card’s comment to edit it with autosave. Check multiple notes, then ch
 
 ### What happens when you delete a capture note
 
-Deleting the last NoteNyang note that references a capture moves its PNG to `.notenyang/.trash/captures/`. The file stays in place while any other NoteNyang note references it. Image links in regular Markdown files can break after the move.
+Deleting the last NoteNyang note that references a capture or drawing moves its PNG to `.notenyang/.trash/images/`. The file stays in place while any other NoteNyang note references it. Image links in regular Markdown files can break after the move.
 
 ## Quote a NoteNyang note in Markdown
 
@@ -83,7 +83,8 @@ Run **NoteNyang: Export all notes to Markdown** to create a single timestamped M
 | --- | --- |
 | Note records | `.notenyang/annotations/` |
 | Advanced PDF notes and custom outlines | `.notenyang/pdf-reader/` |
-| PDF capture images | `NoteNyang 캡처/` |
+| PDF capture images | `NoteNyang 이미지/캡처/` |
+| PDF drawing images | `NoteNyang 이미지/그리기/` |
 | Deleted notes and captures moved with them | `.notenyang/.trash/` |
 | Markdown exports | `.notenyang/exports/` |
 | NoteNyang settings | `.obsidian/plugins/note-nyang/data.json` |
